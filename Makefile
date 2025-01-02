@@ -329,6 +329,17 @@ ifneq (${ENABLE_PAUTH},0)
 	BL_COMMON_SOURCES	+=	lib/extensions/pauth/pauth.c
 endif
 
+###############################################################################
+# Enable Platform Fault Detection Interface
+###############################################################################
+ifeq (${PFDI_SUPPORT},1)
+# Define required variables
+REQUIRED_VARS := PFDI_VENDOR_ID PFDI_LIBRARY_ID PFDI_MAJOR_VERSION	\
+                 PFDI_MINOR_VERSION
+
+$(foreach var, $(REQUIRED_VARS), $(info $(var) is set to $(value $(var))))
+endif #(PFDI_SUPPORT)
+
 ################################################################################
 # RME dependent flags configuration, Enable optional features for RME.
 ################################################################################
@@ -580,6 +591,7 @@ $(eval $(call assert_booleans,\
 	ENABLE_SVE_FOR_SWD \
 	ENABLE_FEAT_GCIE \
 	ENABLE_FEAT_RAS	\
+	PFDI_SUPPORT \
 	FFH_SUPPORT	\
 	ERROR_DEPRECATED \
 	FAULT_INJECTION_SUPPORT \
@@ -723,6 +735,10 @@ $(eval $(call assert_numerics,\
 	SPMC_AT_EL3_PARTITION_MAX_UUIDS \
 	TWED_DELAY \
 	ENABLE_FEAT_TWED \
+	PFDI_LIBRARY_ID \
+	PFDI_MAJOR_VERSION \
+	PFDI_MINOR_VERSION \
+	PFDI_VENDOR_ID \
 	SVE_VECTOR_LEN \
 	IMPDEF_SYSREG_TRAP \
 	W \
@@ -895,11 +911,16 @@ $(eval $(call add_defines,\
 	ENABLE_FEAT_MTE2 \
 	ENABLE_FEAT_PFAR \
 	FEATURE_DETECTION \
+	PFDI_SUPPORT \
 	TWED_DELAY \
 	ENABLE_FEAT_TWED \
 	CONDITIONAL_CMO \
 	IMPDEF_SYSREG_TRAP \
 	SVE_VECTOR_LEN \
+	PFDI_LIBRARY_ID \
+	PFDI_MAJOR_VERSION \
+	PFDI_MINOR_VERSION \
+	PFDI_VENDOR_ID \
 	ENABLE_SPMD_LP \
 	PSA_CRYPTO	\
 	ENABLE_CONSOLE_GETC \

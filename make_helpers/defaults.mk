@@ -293,6 +293,41 @@ SPMD_SPM_AT_SEL2		:= 1
 # image. This is meant to help debugging the post-BL2 phase.
 SPIN_ON_BL1_EXIT		:= 0
 
+# Enable building Trusted Firmware (TF) with support for the Platform Fault Detection
+# Interface (PFDI). When PFDI_SUPPORT is set to 1, you must register the PFDI with the
+# test library using the REGISTER_PFDI_FUNC handler. By default, PFDI support
+# is disabled. Additionally, when enabling PFDI_SUPPORT, you must define the following
+# macros:
+#
+#  - PFDI_VENDOR_ID
+#  - PFDI_LIBRARY_ID
+#  - PFDI_MAJOR_VERSION
+#  - PFDI_MINOR_VERSION
+#
+#  Vendor IDs:
+#  _____________________________________________________________________________
+#  |		Vendor ID		|		Vendor name		|
+#  |____________________________________|_______________________________________|
+#  |		0			|		Arm Limited		|
+#  |____________________________________|_______________________________________|
+#  |		Others			|		Reserved		|
+#  |____________________________________|_______________________________________|
+#
+#  PFDI Test Library Vendor IDs
+#  _____________________________________________________________________________
+#  |		Library ID		|		Library name		|
+#  |____________________________________|_______________________________________|
+#  |		0			|		Arm PFDI Tests		|
+#  |____________________________________|_______________________________________|
+#  |		Others			|		Reserved		|
+#  |____________________________________|_______________________________________|
+#
+PFDI_SUPPORT			:= 0
+PFDI_LIBRARY_ID			:= 0
+PFDI_MAJOR_VERSION		:= 0
+PFDI_MINOR_VERSION		:= 0
+PFDI_VENDOR_ID			:= 0
+
 # Flags to build TF with Trusted Boot support
 TRUSTED_BOARD_BOOT		:= 0
 
