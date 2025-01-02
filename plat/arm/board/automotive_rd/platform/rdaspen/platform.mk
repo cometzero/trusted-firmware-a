@@ -50,6 +50,11 @@ USE_COHERENT_MEM				:=	0
 USE_DSU_DRIVER				:=	1
 PRESERVE_DSU_PMU_REGS			:=	1
 
+ifeq (${PFDI_SUPPORT}, 1)
+BL31_SOURCES		+=	${RDASPEN_BASE}/rdaspen_pfdi.c
+endif
+
+
 # ERRATA
 ERRATA_A720_AE_3699562			:=	1
 
