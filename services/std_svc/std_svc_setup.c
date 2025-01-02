@@ -9,6 +9,7 @@
 
 #include <common/debug.h>
 #include <common/runtime_svc.h>
+#include <drivers/arm/pfdi_mod.h>
 #include <lib/el3_runtime/cpu_data.h>
 #include <lib/pmf/pmf.h>
 #include <lib/psci/psci.h>
@@ -17,6 +18,7 @@
 #include <services/errata_abi_svc.h>
 #include <services/lfa_svc.h>
 #include <services/pci_svc.h>
+#include <services/pfdi_svc.h>
 #include <services/rmmd_svc.h>
 #include <services/sdei.h>
 #include <services/spm_mm_svc.h>
@@ -95,6 +97,11 @@ static int32_t std_svc_setup(void)
 		ret = 1;
 	}
 #endif /* LFA_SUPPORT */
+
+#if PFDI_SUPPORT
+	/* initialize Platform Fault Detection Interface*/
+	plat_pfdi_pe_init();
+#endif
 
 	return ret;
 }
@@ -219,6 +226,13 @@ static uintptr_t std_svc_smc_handler(uint32_t smc_fid,
 				       flags);
 	}
 #endif
+
+#if PFDI_SUPPORT
+	if (is_pfdi_fid(smc_fid)) {
+		return pfdi_smc_handler(smc_fid, x1, x2, x3, x4, cookie, handle,
+					flags);
+	}
+#endif /* PFDI_SUPPORT */
 
 #if DRTM_SUPPORT
 	if (is_drtm_fid(smc_fid)) {

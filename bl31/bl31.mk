@@ -163,6 +163,11 @@ ifeq ($(SMC_PCI_SUPPORT),1)
 BL31_SOURCES		+=	services/std_svc/pci_svc.c
 endif
 
+ifeq ($(PFDI_SUPPORT),1)
+BL31_SOURCES	+=	services/std_svc/pfdi_svc.c \
+			drivers/arm/pfdi/pfdi_mod.c
+endif
+
 ifeq (${ENABLE_RME},1)
 include lib/gpt_rme/gpt_rme.mk
 
