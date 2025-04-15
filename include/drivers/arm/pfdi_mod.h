@@ -197,6 +197,13 @@ pfdi_status_t pfdi_pe_features(uint32_t fid);
 pfdi_status_t pfdi_pe_force_error(const uint32_t fid, const pfdi_status_t error_id);
 
 /**
+ * Run OoR PFDI operations for a specific CPU.
+ *
+ * @return			SUCCESS on success or ERROR on failure.
+ */
+pfdi_status_t pfdi_pe_oor_test_run(void);
+
+/**
  * Macro to register a callback with pfdi library.
  *
  * This macro defines and registers a PFDI function descriptor.

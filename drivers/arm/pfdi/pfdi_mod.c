@@ -21,12 +21,23 @@ static force_err_inject_t error_state[PLATFORM_CORE_COUNT];
 
 void plat_pfdi_pe_init(void)
 {
+	pfdi_status_t pfdi_status;
+
 	assert(pfdi_func_desc.name != NULL);
 	assert(pfdi_func_desc.run != NULL);
 	assert(pfdi_func_desc.count != NULL);
 	assert(pfdi_func_desc.result != NULL);
 
 	NOTICE("PFDI: Initializing Platform Fault Detection Interface.\n");
+
+	NOTICE("PFDI: Running OoR tests on primary core.\n");
+	pfdi_status = pfdi_pe_oor_test_run();
+	if (pfdi_status != PFDI_SUCCESS) {
+		ERROR("PFDI: OoR tests on primary core failed.\n");
+		panic();
+	} else {
+		NOTICE("PFDI: OoR tests on primary core succeeded.\n");
+	}
 }
 
 static pfdi_status_t check_force_error(uint32_t fid)
@@ -172,4 +183,17 @@ pfdi_status_t pfdi_pe_force_error(const uint32_t fid, const pfdi_status_t error_
 	state->error_id = error_id;
 
 	return PFDI_SUCCESS;
+}
+
+pfdi_status_t pfdi_pe_oor_test_run(void)
+{
+	pfdi_status_t ret;
+	uint64_t ft_id, tc_size;
+
+	ret = pfdi_pe_test_part_count(&tc_size);
+	if (ret != PFDI_SUCCESS) {
+		return ret;
+	}
+
+	return pfdi_pe_test_run(0UL, tc_size - 1UL, PFDI_OOR_MODE, &ft_id);
 }

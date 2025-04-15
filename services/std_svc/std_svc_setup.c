@@ -55,6 +55,15 @@ static int32_t std_svc_setup(void)
 		ret = 1;
 	}
 
+#if PFDI_SUPPORT
+	/*
+	 * Initialize Platform Fault Detection Interface before
+	 * SPM is initialized, as it would prevent PSCI operations
+	 * from being invoked from TF-A.
+	 */
+	plat_pfdi_pe_init();
+#endif
+
 #if SPM_MM
 	if (spm_mm_setup() != 0) {
 		ret = 1;
@@ -97,11 +106,6 @@ static int32_t std_svc_setup(void)
 		ret = 1;
 	}
 #endif /* LFA_SUPPORT */
-
-#if PFDI_SUPPORT
-	/* initialize Platform Fault Detection Interface*/
-	plat_pfdi_pe_init();
-#endif
 
 	return ret;
 }
