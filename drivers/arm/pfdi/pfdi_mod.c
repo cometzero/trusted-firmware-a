@@ -6,6 +6,8 @@
 
 #include <assert.h>
 #include <drivers/arm/pfdi_mod.h>
+#include <plat/arm/common/plat_arm.h>
+#include <plat/common/platform.h>
 #include <services/pfdi_svc.h>
 
 /**
@@ -37,6 +39,52 @@ void plat_pfdi_pe_init(void)
 		panic();
 	} else {
 		NOTICE("PFDI: OoR tests on primary core succeeded.\n");
+	}
+
+	NOTICE("PFDI: Running OoR tests on secondary cores.\n");
+
+	for (uint8_t cluster_id = 0; cluster_id < PLAT_ARM_CLUSTER_COUNT; cluster_id++) {
+		for (uint8_t cpu_id = 0; cpu_id < PLAT_MAX_CPUS_PER_CLUSTER; cpu_id++) {
+			uint64_t ft_id;
+			int psci_ret;
+			u_register_t mpidr = ((cpu_id & MPIDR_AFFLVL_MASK) << MPIDR_AFF1_SHIFT) |
+					((cluster_id & MPIDR_AFFLVL_MASK) << MPIDR_AFF2_SHIFT);
+
+			if (plat_arm_get_cluster_core_count(mpidr) <= cpu_id) {
+				break;
+			}
+
+			int cpu_num = plat_core_pos_by_mpidr(mpidr);
+
+			/*
+			 * This function is only called from the primary core,
+			 * so it must be the primary core if the mpidr matches the current core.
+			 */
+			if (plat_my_core_pos() == cpu_num) {
+				continue;
+			}
+
+			/*
+			 * Entrypoint is not used but the platform specific validation
+			 * makes sure that the address is within the DRAM.
+			 */
+			psci_ret = psci_cpu_on(mpidr, (uintptr_t)ARM_DRAM1_BASE, 0U);
+			if (psci_ret == PSCI_E_SUCCESS) {
+				do {
+					pfdi_status = pfdi_func_desc.result(cpu_num, &ft_id);
+				} while (pfdi_status == PFDI_NOT_RUN);
+			} else {
+				ERROR("PFDI: Failed to turn on core %d.\n", cpu_num);
+				continue;
+			}
+
+			if (pfdi_status != PFDI_SUCCESS) {
+				ERROR("PFDI: OoR tests on core %d failed at test %ld.\n",
+					cpu_num, ft_id);
+			} else {
+				INFO("PFDI: OoR tests on core %d succeeded.\n", cpu_num);
+			}
+		}
 	}
 }
 
@@ -190,10 +238,30 @@ pfdi_status_t pfdi_pe_oor_test_run(void)
 	pfdi_status_t ret;
 	uint64_t ft_id, tc_size;
 
-	ret = pfdi_pe_test_part_count(&tc_size);
-	if (ret != PFDI_SUCCESS) {
+	/*
+	 * Make sure that the OoR PFDI was not ran before,
+	 * whether it succeeded or failed the last time.
+	 */
+	ret = pfdi_pe_test_result(&ft_id);
+	if (ret != PFDI_NOT_RUN) {
 		return ret;
 	}
 
-	return pfdi_pe_test_run(0UL, tc_size - 1UL, PFDI_OOR_MODE, &ft_id);
+	ret = pfdi_pe_test_part_count(&tc_size);
+	if (ret != PFDI_SUCCESS) {
+		goto exit;
+	}
+
+	ret = pfdi_pe_test_run(0UL, tc_size - 1UL, PFDI_OOR_MODE, &ft_id);
+
+exit:
+	/*
+	 * Out-of-Reset PFDI for secondary cores are triggered
+	 * by primary core, so put the core back to off state.
+	 */
+	if (!plat_is_my_cpu_primary()) {
+		return psci_cpu_off();
+	}
+
+	return ret;
 }

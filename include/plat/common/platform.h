@@ -181,6 +181,7 @@ const char *plat_log_get_prefix(unsigned int log_level);
 void bl2_plat_preload_setup(void);
 void plat_setup_try_img_ops(const struct plat_try_images_ops *plat_try_ops);
 void plat_setup_log_gpt_corrupted(const struct plat_log_gpt_corrupted *log_gpt);
+unsigned int plat_is_my_cpu_primary(void);
 
 #if MEASURED_BOOT
 int plat_mboot_measure_image(unsigned int image_id, image_info_t *image_data);

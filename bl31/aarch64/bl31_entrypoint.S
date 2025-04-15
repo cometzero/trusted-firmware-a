@@ -171,6 +171,10 @@ func bl31_warm_entrypoint
 
 	bl	bl31_warmboot
 
+#if PFDI_SUPPORT
+	bl 	pfdi_pe_oor_test_run
+#endif
+
 #if ENABLE_RUNTIME_INSTRUMENTATION
 	pmf_calc_timestamp_addr rt_instr_svc, RT_INSTR_EXIT_PSCI
 	mov	x19, x0
