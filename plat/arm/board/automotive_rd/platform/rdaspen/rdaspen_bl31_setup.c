@@ -6,8 +6,11 @@
 
 #include <assert.h>
 #include <drivers/arm/css/css_mhu_doorbell.h>
+#include <drivers/arm/css/css_scp.h>
 #include <drivers/arm/css/scmi.h>
 #include <drivers/arm/dsu.h>
+#include <drivers/arm/pfdi_mod.h>
+#include <plat/common/platform.h>
 
 static scmi_channel_plat_info_t plat_rd_scmi_info[] = {
 	{
@@ -25,8 +28,31 @@ scmi_channel_plat_info_t *plat_css_get_scmi_info(unsigned int channel_id)
 	return &plat_rd_scmi_info[channel_id];
 }
 
+#if PFDI_SUPPORT
+static int rdaspen_pwr_domain_on(u_register_t mpidr)
+{
+	uint64_t ft_id;
+	uint64_t cpu_num = plat_core_pos_by_mpidr(mpidr);
+	pfdi_status_t pfdi_status = pfdi_func_desc.result(cpu_num, &ft_id);
+	/*
+	 * The core can only boot if the OoR PFDI tests have not failed
+	 * or if the OoR PFDI tests have not been run yet.
+	 */
+	if ((pfdi_status != PFDI_SUCCESS) && (pfdi_status != PFDI_NOT_RUN)) {
+		return PSCI_E_INTERN_FAIL;
+	}
+
+	css_scp_on(mpidr);
+
+	return PSCI_E_SUCCESS;
+}
+#endif
+
 const plat_psci_ops_t *plat_arm_psci_override_pm_ops(plat_psci_ops_t *ops)
 {
+#if PFDI_SUPPORT
+	ops->pwr_domain_on = rdaspen_pwr_domain_on;
+#endif
 	return css_scmi_override_pm_ops(ops);
 }
 
