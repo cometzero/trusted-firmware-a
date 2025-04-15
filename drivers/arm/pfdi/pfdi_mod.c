@@ -98,12 +98,14 @@ pfdi_status_t pfdi_pe_test_id(uint64_t *lib_version)
 pfdi_status_t pfdi_pe_test_result(uint64_t *ft_id)
 {
 	pfdi_status_t ret;
+	uint64_t cpu_num;
 
 	ret = check_force_error(PFDI_PE_TEST_RESULT);
 	if (ret != RESERVED_ERROR_ID)
 		return ret;
 
-	return pfdi_func_desc.result(ft_id);
+	cpu_num = plat_my_core_pos();
+	return pfdi_func_desc.result(cpu_num, ft_id);
 }
 
 pfdi_status_t pfdi_version(uint64_t *pfdi_version)

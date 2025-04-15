@@ -111,11 +111,12 @@ typedef struct pfdi_func_desc_s
 	/**
 	 * Get the PFDI test result.
 	 *
+	 * @param[in] cpu_num		Logical CPU number.
 	 * @param[out] ft_id		The failed test case id.
 	 *
 	 * @return			PFDI_SUCCESS on success or PFDI_ERROR on failure.
 	 */
-	pfdi_status_t (*result)(uint64_t *ft_id);
+	pfdi_status_t (*result)(uint64_t cpu_num, uint64_t *ft_id);
 
 } pfdi_func_desc_t;
 

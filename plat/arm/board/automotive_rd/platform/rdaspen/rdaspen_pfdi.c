@@ -18,6 +18,18 @@
 
 #define MAX_NUM_TESTS			U(41)
 
+typedef struct {
+	pfdi_status_t status;
+	uint64_t ft_id;
+} pfdi_tests_results_t;
+
+static volatile pfdi_tests_results_t oor_pfdi_tests_results[PLATFORM_CORE_COUNT] = {
+	[0 ... PLATFORM_CORE_COUNT - 1] = {
+		.status = PFDI_NOT_RUN,
+		.ft_id = UINT64_MAX
+	}
+};
+
 /* Executes CPU-specific self-tests for the current core.
  *
  * @start: Start index of the test range to execute.
@@ -35,7 +47,6 @@ static pfdi_status_t pfdi_cpu_self_test_run(uint64_t start, uint64_t end,
 	pfdi_status_t status = PFDI_SUCCESS;
 	(void)start;
 	(void)end;
-	(void)mode;
 
 	if (cpu_num >= PLATFORM_CORE_COUNT) {
 		WARN("PFDI: Invalid CPU index: %llu\n", cpu_num);
@@ -67,6 +78,12 @@ static pfdi_status_t pfdi_cpu_self_test_run(uint64_t start, uint64_t end,
 		*ft_id = UINT64_MAX;	/* All tests passed */
 	}
 
+	/* Store result only in Out-of-Reset mode for later retrieval via result query */
+	if (mode == PFDI_OOR_MODE) {
+		oor_pfdi_tests_results[cpu_num].status = status;
+		oor_pfdi_tests_results[cpu_num].ft_id = (ft_id != NULL) ? *ft_id : 0;
+	}
+
 	return status;
 }
 
@@ -94,9 +111,33 @@ static pfdi_status_t pfdi_cpu_self_test_count(uint64_t *testcase_count)
 	return PFDI_SUCCESS;
 }
 
-static pfdi_status_t pfdi_cpu_self_test_result(uint64_t *ft_id)
+/*
+ * Retrieves the result of the out-of-reset (OoR) CPU self-test for the specified core.
+ *
+ * @cpu_num:  Logical CPU/core number for which the OoR test result is requested.
+ * @ft_id:    Output parameter used to return the fault test ID associated with this CPU.
+ *        This may represent a specific test case ID recorded during the boot-time OOR test.
+ *
+ * Returns:
+ *  - PFDI_SUCCESS if the result is available
+ *  - PFDI_ERROR if the CPU index is invalid
+ *
+ * Note:
+ *  The results returned reflect the test status collected during the boot sequence
+ *  as part of platform-level fault detection.
+ */
+static pfdi_status_t pfdi_cpu_self_test_result(uint64_t cpu_num, uint64_t *ft_id)
 {
-	return PFDI_SUCCESS;
+	if (cpu_num >= PLATFORM_CORE_COUNT) {
+		WARN("PFDI: Invalid CPU index: %llu\n", cpu_num);
+		return PFDI_ERROR;
+	}
+
+	if (ft_id != NULL) {
+		*ft_id = oor_pfdi_tests_results[cpu_num].ft_id;
+	}
+
+	return oor_pfdi_tests_results[cpu_num].status;
 }
 
 REGISTER_PFDI_FUNC(LIB_NAME, pfdi_cpu_self_test_run, pfdi_cpu_self_test_count,
