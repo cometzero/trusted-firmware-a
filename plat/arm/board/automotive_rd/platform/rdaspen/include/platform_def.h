@@ -10,6 +10,8 @@
 #include <lib/utils_def.h>
 #include <lib/xlat_tables/xlat_tables_defs.h>
 
+#define PLAT_ARM_SHARED_RAM_SIZE		UL(0x2000)	/* 8 KB */
+
 #define PLAT_ARM_TRUSTED_SRAM_BASE		UL(0x0)
 #define PLAT_ARM_TRUSTED_SRAM_SIZE		UL(0x00100000)
 
@@ -139,6 +141,9 @@
 #define CSS_SYSTEM_PWR_DMN_LVL			ARM_PWR_LVL2
 #define PLAT_MAX_PWR_LVL			ARM_PWR_LVL1
 
+/* SCMI PFDI Monitor Related Constants */
+#define PLAT_ARM_SCMI_PFDI_MONITOR_CHANNEL_COUNT	U(16)
+
 #define MAX_IO_DEVICES				U(3)
 #define MAX_IO_HANDLES				U(4)
 
@@ -192,7 +197,7 @@
 							MT_SECURE)
 
 /* Trusted OS Config region */
-#define PLAT_TOS_FW_CONFIG_BASE		UL(0x1800)
+#define PLAT_TOS_FW_CONFIG_BASE		UL(0x2800)
 #define PLAT_TOS_FW_CONFIG_SIZE		UL(0x1000)
 
 /* SPMC region */
@@ -299,5 +304,19 @@
 #define AP_RSE_SECURE_MHU_V3_PBX	RDASPEN_CSS_AP_RSE_SECURE_MHU_BASE
 #define AP_RSE_SECURE_MHU_V3_MBX	RDASPEN_CSS_AP_RSE_SECURE_MHU_BASE + \
 						MHU_V3_MBX_FRAME_OFFSET
+
+/*
+ * The SCMI PFDI Monitor memory regions
+ */
+#define RDASPEN_SCMI_PFDI_MONITOR_BASE			\
+	(CSS_SCMI_PAYLOAD_BASE + CSS_SCMI_PAYLOAD_SIZE_MAX)
+/*
+ * The size of reserved shared memory for each core =
+ * sizeof(mailbox_mem_t) + SCMI PFDI Monitor payload size =
+ * 32 + 8 = 40 bytes
+ */
+#define RDASPEN_SCMI_PFDI_MONITOR_SIZE_PER_CHANNEL	40
+#define RDASPEN_SCMI_PFDI_MONITOR_SIZE_MAX		\
+	(RDASPEN_SCMI_PFDI_MONITOR_SIZE_PER_CHANNEL * PLAT_ARM_SCMI_PFDI_MONITOR_CHANNEL_COUNT)
 
 #endif  /* PLATFORM_DEF_H */

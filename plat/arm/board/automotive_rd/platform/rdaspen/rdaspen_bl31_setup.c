@@ -15,6 +15,18 @@
 #include <plat/common/platform.h>
 #include <rdaspen_ras.h>
 
+#define SCMI_PFDI_MONITOR_CHANNEL_BASE	1U
+
+#define SCMI_PFDI_MONITOR_INFO(channel_id)	\
+{							\
+		.scmi_mbx_mem = RDASPEN_SCMI_PFDI_MONITOR_BASE + \
+			(RDASPEN_SCMI_PFDI_MONITOR_SIZE_PER_CHANNEL * channel_id), \
+		.db_reg_addr = PLAT_CSS_MHU_BASE + MHU_V3_SENDER_REG_SET(SCMI_PFDI_MONITOR_CHANNEL_BASE + channel_id), \
+		.db_preserve_mask = 0xfffffffe, \
+		.db_modify_mask = 0x1, \
+		.ring_doorbell = &mhu_ring_doorbell,	\
+}
+
 static scmi_channel_plat_info_t plat_rd_scmi_info[] = {
 	{
 		.scmi_mbx_mem = CSS_SCMI_PAYLOAD_BASE,
@@ -24,6 +36,27 @@ static scmi_channel_plat_info_t plat_rd_scmi_info[] = {
 		.ring_doorbell = &mhu_ring_doorbell,
 	},
 };
+
+#if SCMI_PFDI_MONITOR
+static scmi_channel_plat_info_t plat_rd_scmi_pfdi_monitor_info[] = {
+	SCMI_PFDI_MONITOR_INFO(0),
+	SCMI_PFDI_MONITOR_INFO(1),
+	SCMI_PFDI_MONITOR_INFO(2),
+	SCMI_PFDI_MONITOR_INFO(3),
+	SCMI_PFDI_MONITOR_INFO(4),
+	SCMI_PFDI_MONITOR_INFO(5),
+	SCMI_PFDI_MONITOR_INFO(6),
+	SCMI_PFDI_MONITOR_INFO(7),
+	SCMI_PFDI_MONITOR_INFO(8),
+	SCMI_PFDI_MONITOR_INFO(9),
+	SCMI_PFDI_MONITOR_INFO(10),
+	SCMI_PFDI_MONITOR_INFO(11),
+	SCMI_PFDI_MONITOR_INFO(12),
+	SCMI_PFDI_MONITOR_INFO(13),
+	SCMI_PFDI_MONITOR_INFO(14),
+	SCMI_PFDI_MONITOR_INFO(15),
+};
+#endif
 
 scmi_channel_plat_info_t *plat_css_get_scmi_info(unsigned int channel_id)
 {
@@ -87,3 +120,11 @@ int plat_spmd_handle_group0_interrupt(uint32_t intid)
 	return -1;
 }
 #endif /* defined(SPD_spmd) && (SPMC_AT_EL3 == 0) */
+
+#if SCMI_PFDI_MONITOR
+scmi_channel_plat_info_t *plat_css_get_scmi_pfdi_monitor_info(unsigned int channel_id)
+{
+	assert(channel_id < PLAT_ARM_SCMI_PFDI_MONITOR_CHANNEL_COUNT);
+	return &plat_rd_scmi_pfdi_monitor_info[channel_id];
+}
+#endif

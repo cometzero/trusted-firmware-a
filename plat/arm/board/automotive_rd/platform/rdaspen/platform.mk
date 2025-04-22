@@ -11,6 +11,11 @@ RDASPEN_CPU_SOURCES	:=	lib/cpus/aarch64/cortex_a720_ae.S
 PLAT_INCLUDES		+=	-I${RDASPEN_BASE}/include/ 	\
 				-I${RDASPEN_BASE}/ras/include/
 
+ifeq (${SCMI_PFDI_MONITOR}, 1)
+PLAT_INCLUDES		+=	-Idrivers/arm/css/scmi \
+				-Idrivers/arm/css/scmi/vendor
+endif
+
 override ARM_FW_CONFIG_LOAD_ENABLE		:=	1
 override ARM_PLAT_MT				:=	1
 override ARM_PLAT_PROVIDES_BL2_MEM_PARAMS	:=	1
