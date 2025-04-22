@@ -340,6 +340,19 @@ REQUIRED_VARS := PFDI_VENDOR_ID PFDI_LIBRARY_ID PFDI_MAJOR_VERSION	\
 $(foreach var, $(REQUIRED_VARS), $(info $(var) is set to $(value $(var))))
 endif #(PFDI_SUPPORT)
 
+###############################################################################
+# Enable SCMI Platform Fault Detection Interface Monitor
+###############################################################################
+ifeq (${SCMI_PFDI_MONITOR},1)
+ifeq (${PFDI_SUPPORT},0)
+        $(error Error: SCMI_PFDI_MONITOR requires PFDI_SUPPORT to be enabled.)
+endif
+# Define required variables
+REQUIRED_VARS := PLAT_ARM_SCMI_PFDI_MONITOR_CHANNEL_COUNT
+
+$(foreach var, $(REQUIRED_VARS), $(info $(var) is set to $(value $(var))))
+endif #(SCMI_PFDI_MONITOR)
+
 ################################################################################
 # RME dependent flags configuration, Enable optional features for RME.
 ################################################################################
@@ -592,6 +605,7 @@ $(eval $(call assert_booleans,\
 	ENABLE_FEAT_GCIE \
 	ENABLE_FEAT_RAS	\
 	PFDI_SUPPORT \
+	SCMI_PFDI_MONITOR \
 	FFH_SUPPORT	\
 	ERROR_DEPRECATED \
 	FAULT_INJECTION_SUPPORT \
@@ -912,6 +926,7 @@ $(eval $(call add_defines,\
 	ENABLE_FEAT_PFAR \
 	FEATURE_DETECTION \
 	PFDI_SUPPORT \
+	SCMI_PFDI_MONITOR \
 	TWED_DELAY \
 	ENABLE_FEAT_TWED \
 	CONDITIONAL_CMO \

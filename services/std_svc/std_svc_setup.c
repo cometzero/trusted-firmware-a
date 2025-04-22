@@ -9,6 +9,7 @@
 
 #include <common/debug.h>
 #include <common/runtime_svc.h>
+#include <drivers/arm/css/scmi.h>
 #include <drivers/arm/pfdi_mod.h>
 #include <lib/el3_runtime/cpu_data.h>
 #include <lib/pmf/pmf.h>
@@ -54,6 +55,11 @@ static int32_t std_svc_setup(void)
 	if (psci_setup((const psci_lib_args_t *)svc_arg) != PSCI_E_SUCCESS) {
 		ret = 1;
 	}
+
+#if SCMI_PFDI_MONITOR
+	/* Initialize SCMI PFDI Monitor */
+	plat_scmi_pfdi_monitor_setup();
+#endif
 
 #if PFDI_SUPPORT
 	/*

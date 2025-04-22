@@ -328,6 +328,9 @@ PFDI_MAJOR_VERSION		:= 0
 PFDI_MINOR_VERSION		:= 0
 PFDI_VENDOR_ID			:= 0
 
+# Flags to build SCMI PFDI Monitor
+SCMI_PFDI_MONITOR       := 0
+
 # Flags to build TF with Trusted Boot support
 TRUSTED_BOARD_BOOT		:= 0
 

@@ -276,7 +276,7 @@ typedef struct
  *  Optional platform pfdi function descriptor.
  */
 #pragma weak plat_pfdi_func_desc
-extern const plat_pfdi_func_desc_t plat_pfdi_func_desc;
+extern plat_pfdi_func_desc_t plat_pfdi_func_desc;
 
 /**
  * Macro to register a callback with platform specific pfdi functions.
@@ -289,7 +289,7 @@ extern const plat_pfdi_func_desc_t plat_pfdi_func_desc;
  * @param _post_run	The function pointer for post run activities.
  */
 #define REGISTER_PFDI_PLAT_FUNC(_name, _force_err, _check_err, _post_run)	\
-	const plat_pfdi_func_desc_t plat_pfdi_func_desc = {			\
+	plat_pfdi_func_desc_t plat_pfdi_func_desc = {				\
 		.name = _name,							\
 		.force_plat_err = _force_err,					\
 		.check_plat_err = _check_err,					\

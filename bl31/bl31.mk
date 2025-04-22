@@ -168,6 +168,11 @@ BL31_SOURCES	+=	services/std_svc/pfdi_svc.c \
 			drivers/arm/pfdi/pfdi_mod.c
 endif
 
+ifeq ($(SCMI_PFDI_MONITOR),1)
+BL31_SOURCES	+=	drivers/arm/css/scmi/scmi_common.c		\
+			drivers/arm/css/scmi/vendor/scmi_pfdi_monitor.c
+endif
+
 ifeq (${ENABLE_RME},1)
 include lib/gpt_rme/gpt_rme.mk
 

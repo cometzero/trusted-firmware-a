@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2024, Arm Limited and Contributors. All rights reserved.
+ * Copyright (c) 2017-2025, Arm Limited and Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -195,5 +195,9 @@ scmi_channel_plat_info_t *plat_css_get_scmi_info(unsigned int channel_id);
 
 /* API to override default PSCI callbacks for platforms that support SCMI. */
 const plat_psci_ops_t *css_scmi_override_pm_ops(plat_psci_ops_t *ops);
+
+/* PFDI monitoring APIs */
+void plat_scmi_pfdi_monitor_setup(void);
+scmi_channel_plat_info_t *plat_css_get_scmi_pfdi_monitor_info(unsigned int channel_id);
 
 #endif /* SCMI_H */
