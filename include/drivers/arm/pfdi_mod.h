@@ -256,6 +256,20 @@ typedef struct
 	 */
 	pfdi_status_t (*check_plat_err)(const uint32_t fid, const pfdi_status_t error_id);
 
+	/**
+	 * Post-run PFDI operations for a specific CPU.
+	 *
+	 * @param[in] status		Whether the last run succeeded or failed.
+	 * @param[in] start		The start test case number.
+	 * @param[in] end		The end test case number.
+	 * @param[in] mode		PFDI operation mode (online/out of reset)
+	 * @param[out] ft_id		The failed test case id.
+	 *
+	 * @return			Void
+	 */
+	void (*post_run)(pfdi_status_t status, uint64_t start, uint64_t end,
+			uint64_t mode, uint64_t *ft_id);
+
 } plat_pfdi_func_desc_t;
 
 /**
@@ -272,12 +286,14 @@ extern const plat_pfdi_func_desc_t plat_pfdi_func_desc;
  * @param _name		The name of the callback.
  * @param _force_err	The function pointer for force platform pfdi error.
  * @param _check_err	THe function pointer to check platform error.
+ * @param _post_run	The function pointer for post run activities.
  */
-#define REGISTER_PFDI_PLAT_FUNC(_name, _force_err, _check_err)	\
-	const plat_pfdi_func_desc_t plat_pfdi_func_desc = {	\
-		.name = _name,					\
-		.force_plat_err = _force_err,			\
-		.check_plat_err = _check_err			\
+#define REGISTER_PFDI_PLAT_FUNC(_name, _force_err, _check_err, _post_run)	\
+	const plat_pfdi_func_desc_t plat_pfdi_func_desc = {			\
+		.name = _name,							\
+		.force_plat_err = _force_err,					\
+		.check_plat_err = _check_err,					\
+		.post_run = _post_run						\
 	}
 
 /*

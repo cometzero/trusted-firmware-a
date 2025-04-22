@@ -123,16 +123,26 @@ pfdi_status_t pfdi_pe_test_run(uint64_t start, uint64_t end, uint64_t mode,
 
 	ret = check_force_error(PFDI_PE_TEST_RUN);
 	if (ret != RESERVED_ERROR_ID)
-		return ret;
+		goto exit;
 
-	if (pfdi_func_desc.count(&test_count) != PFDI_SUCCESS)
-		return PFDI_ERROR;
-
-	if (start > end || end > test_count || (!IS_VALID_MODE(mode))) {
-		return PFDI_INVALID_PARAMETERS;
+	if (pfdi_func_desc.count(&test_count) != PFDI_SUCCESS) {
+		ret = PFDI_ERROR;
+		goto exit;
 	}
 
-	return pfdi_func_desc.run(start, end, mode, ft_id);
+	if (start > end || end > test_count || (!IS_VALID_MODE(mode))) {
+		ret = PFDI_INVALID_PARAMETERS;
+		goto exit;
+	}
+
+	ret = pfdi_func_desc.run(start, end, mode, ft_id);
+
+exit:
+	if (PFDI_HAS_PLAT_FUNC(post_run)) {
+		plat_pfdi_func_desc.post_run(ret, start, end, mode, ft_id);
+	}
+
+	return ret;
 }
 
 pfdi_status_t pfdi_pe_test_id(uint64_t *lib_version)

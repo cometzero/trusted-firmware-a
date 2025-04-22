@@ -53,4 +53,4 @@ static pfdi_status_t plat_sbist_err_validation(const uint32_t fid,
 	return error_id;
 }
 
-REGISTER_PFDI_PLAT_FUNC("RD_ASPEN", NULL, plat_sbist_err_validation);
+REGISTER_PFDI_PLAT_FUNC("RD_ASPEN", NULL, plat_sbist_err_validation, NULL);
