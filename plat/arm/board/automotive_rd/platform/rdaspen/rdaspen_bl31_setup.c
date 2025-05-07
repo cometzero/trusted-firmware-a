@@ -10,7 +10,9 @@
 #include <drivers/arm/css/scmi.h>
 #include <drivers/arm/dsu.h>
 #include <drivers/arm/pfdi_mod.h>
+#include <plat/arm/common/plat_arm.h>
 #include <plat/common/platform.h>
+#include <rdaspen_ras.h>
 
 static scmi_channel_plat_info_t plat_rd_scmi_info[] = {
 	{
@@ -53,6 +55,7 @@ const plat_psci_ops_t *plat_arm_psci_override_pm_ops(plat_psci_ops_t *ops)
 #if PFDI_SUPPORT
 	ops->pwr_domain_on = rdaspen_pwr_domain_on;
 #endif
+	ops->pwr_domain_on_finish = rdaspen_css_pwr_domain_on_finish;
 	return css_scmi_override_pm_ops(ops);
 }
 
@@ -62,6 +65,15 @@ const dsu_driver_data_t plat_dsu_data = {
 	.clusterpwrctlr_cachepwr = CLUSTERPWRCTLR_CACHEPWR_RESET,
 	.clusterpwrctlr_funcret = CLUSTERPWRCTLR_FUNCRET_RESET
 };
+
+void bl31_platform_setup(void)
+{
+	arm_bl31_platform_setup();
+#if USE_GIC_DRIVER == 3
+	gic_set_gicr_frames(arm_gicr_base_addrs);
+#endif
+	rdaspen_ras_init_per_cpu();
+}
 
 #if defined(SPD_spmd) && (SPMC_AT_EL3 == 0)
 /*
