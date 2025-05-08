@@ -37,7 +37,11 @@ uint64_t pfdi_smc_handler(uint32_t smc_fid,
 		SMC_RET1(handle, ret);
 		break;
 	case PFDI_FEATURES:
-		SMC_RET1(handle, PFDI_NOT_SUPPORTED);
+		ret = pfdi_pe_features((uint32_t)x1);
+		if (ret == PFDI_SUCCESS)
+			SMC_RET1(handle, PFDI_SUCCESS);
+
+		SMC_RET1(handle, ret);
 		break;
 	case PFDI_PE_TEST_ID:
 		uint64_t lib_version = 0;
@@ -75,7 +79,8 @@ uint64_t pfdi_smc_handler(uint32_t smc_fid,
 		SMC_RET1(handle, PFDI_SUCCESS);
 		break;
 	case PFDI_FORCE_ERROR:
-		SMC_RET1(handle, PFDI_NOT_SUPPORTED);
+		ret = pfdi_pe_force_error((uint32_t)x1, (pfdi_status_t)x2);
+		SMC_RET1(handle, ret);
 		break;
 	default:
 		WARN("Unsupported PFDI Service Call: 0x%x\n", smc_fid);

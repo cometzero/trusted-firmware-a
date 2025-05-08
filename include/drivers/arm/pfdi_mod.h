@@ -177,6 +177,25 @@ pfdi_status_t pfdi_pe_test_result(uint64_t *ft_id);
 pfdi_status_t pfdi_version(uint64_t *pfdi_version);
 
 /**
+ * Check supported features.
+ *
+ * @param[in] fid		Function identifier to check.
+ *
+ * @return			PFDI_SUCCESS on success or PFDI_ERROR on failure.
+ */
+pfdi_status_t pfdi_pe_features(uint32_t fid);
+
+/**
+ * Force error on request.
+ *
+ * @param[in] fid		Targeted smc function id.
+ * @param[in] error_id		Targeted PFDI error id.
+ *
+ * @return			PFDI_SUCCESS on success or PFDI_ERROR on failure.
+ */
+pfdi_status_t pfdi_pe_force_error(const uint32_t fid, const pfdi_status_t error_id);
+
+/**
  * Macro to register a callback with pfdi library.
  *
  * This macro defines and registers a PFDI function descriptor.
@@ -198,5 +217,67 @@ pfdi_status_t pfdi_version(uint64_t *pfdi_version);
  * Declaration for a registered PFDI handlers
  */
 extern const pfdi_func_desc_t pfdi_func_desc;
+
+/**
+ * Platform PFDI function descriptor (optional).
+ */
+typedef struct
+{
+	/**
+	 * Name of the Platform PFDI function.
+	 */
+	const char *name;
+
+	/**
+	 * Optional function handler to force platform specific error.
+	 *
+	 * @param fid		Function Id to inject error.
+	 * @param error_id	ERROR Id to force error.
+	 *
+	 * @return		PFDI_SUCCESS on success or PFDI_ERROR on failure.
+	 */
+	pfdi_status_t (*force_plat_err)(const uint32_t fid, const pfdi_status_t error_id);
+
+	/**
+	 * Optional function handler to check platform specific errors.
+	 *
+	 * @param fid		Function Id to check error status.
+	 * @param error_id	ERROR Id to be expected.
+	 *
+	 * @return		return the platform error id.
+	 */
+	pfdi_status_t (*check_plat_err)(const uint32_t fid, const pfdi_status_t error_id);
+
+} plat_pfdi_func_desc_t;
+
+/**
+ *  Optional platform pfdi function descriptor.
+ */
+#pragma weak plat_pfdi_func_desc
+extern const plat_pfdi_func_desc_t plat_pfdi_func_desc;
+
+/**
+ * Macro to register a callback with platform specific pfdi functions.
+ *
+ * This macro defines and registers a Platform PFDI function descriptor.
+ *
+ * @param _name		The name of the callback.
+ * @param _force_err	The function pointer for force platform pfdi error.
+ * @param _check_err	THe function pointer to check platform error.
+ */
+#define REGISTER_PFDI_PLAT_FUNC(_name, _force_err, _check_err)	\
+	const plat_pfdi_func_desc_t plat_pfdi_func_desc = {	\
+		.name = _name,					\
+		.force_plat_err = _force_err,			\
+		.check_plat_err = _check_err			\
+	}
+
+/*
+ * Returns true if the weak‐alias struct exists and the given callback
+ * pointer is non-NULL.
+ */
+#define PFDI_HAS_PLAT_FUNC(func) \
+	(((const void *)&plat_pfdi_func_desc != NULL)	\
+	&& (plat_pfdi_func_desc.func != NULL))
 
 #endif /* PFDI_MOD_H */
