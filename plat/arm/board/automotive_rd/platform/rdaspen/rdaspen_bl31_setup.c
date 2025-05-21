@@ -7,6 +7,7 @@
 #include <assert.h>
 #include <drivers/arm/css/css_mhu_doorbell.h>
 #include <drivers/arm/css/css_scp.h>
+#include <drivers/generic_delay_timer.h>
 #include <drivers/arm/css/scmi.h>
 #include <drivers/arm/dsu.h>
 #include <drivers/arm/pfdi_mod.h>
@@ -72,6 +73,7 @@ void bl31_platform_setup(void)
 #if USE_GIC_DRIVER == 3
 	gic_set_gicr_frames(arm_gicr_base_addrs);
 #endif
+	generic_delay_timer_init();
 	rdaspen_ras_init_per_cpu();
 }
 

@@ -8,6 +8,7 @@
 #include <bl31/interrupt_mgmt.h>
 #include <plat/common/platform.h>
 #include <plat/arm/css/common/css_pm.h>
+#include <drivers/delay_timer.h>
 #include <platform_def.h>
 #include <rdaspen_ras.h>
 #include <lib/extensions/ras.h>
