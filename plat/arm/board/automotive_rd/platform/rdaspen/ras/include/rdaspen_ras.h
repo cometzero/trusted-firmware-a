@@ -25,6 +25,11 @@
  */
 #define RAS_SYNC_TIMEOUT_US			U(10000)
 
+/* Assembly helpers for CPU RAS Registers */
+void clear_cpu_pfg_ctrl_register(void);
+void clear_cpu_pfg_cdn_register(void);
+void clear_cpu_erx_misc0_register(void);
+
 void rdaspen_ras_init_per_cpu(void);
 void rdaspen_css_pwr_domain_on_finish(const psci_power_state_t *target_state);
 

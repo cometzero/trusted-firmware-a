@@ -72,6 +72,11 @@ static int rdaspen_ras_cpu_intr_handler(
 
 	errx_status = read_erxstatus_el1();
 	write_erxstatus_el1(errx_status);
+	clear_cpu_erx_misc0_register();
+	/* Pseudo generation registers are cleared to avoid interrupt flood from NS */
+	clear_cpu_pfg_ctrl_register();
+	/* Injected Errors cannot be stopped until these registers are cleared */
+	clear_cpu_pfg_cdn_register();
 
 	plat_ic_end_of_interrupt(data->interrupt);
 	return 0;

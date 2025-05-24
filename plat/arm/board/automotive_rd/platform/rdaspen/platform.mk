@@ -79,6 +79,7 @@ BL31_SOURCES	+=	${RDASPEN_CPU_SOURCES}	\
 			${RDASPEN_BASE}/rdaspen_bl31_setup.c	\
 			${RDASPEN_BASE}/rdaspen_topology.c	\
 			${RDASPEN_BASE}/ras/rdaspen_ras.c	\
+			${RDASPEN_BASE}/ras/rdaspen_ras_helpers.S \
 			drivers/cfi/v2m/v2m_flash.c		\
 			drivers/delay_timer/generic_delay_timer.c  \
 			lib/utils/mem_region.c	\
