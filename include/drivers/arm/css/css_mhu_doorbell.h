@@ -21,6 +21,7 @@
 
 #define SENDER_REG_STAT(_channel)	(0x20 * (_channel))
 #define SENDER_REG_SET(_channel)	((0x20 * (_channel)) + 0xC)
+#define RECIEVER_REG_CLR(_channel)	((0x20 * (_channel)) + 0x8)
 
 #define MHU_V3_PBX_PDBCW_PAGE_OFFSET		UL(0x1000)
 #define MHU_V3_SENDER_REG_SET(_channel)		(MHU_V3_PBX_PDBCW_PAGE_OFFSET + \
