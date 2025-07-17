@@ -10,6 +10,9 @@
 #include <lib/fconf/fconf_dyn_cfg_getter.h>
 #include <plat/arm/common/plat_arm.h>
 #include <plat/common/platform.h>
+#ifdef PFDI_SUPPORT
+#include "rdaspen_sbist.h"
+#endif /* PFDI_SUPPORT */
 
 const mmap_region_t plat_arm_mmap[] = {
 	ARM_MAP_SHARED_RAM,
@@ -23,6 +26,14 @@ const mmap_region_t plat_arm_mmap[] = {
 	RDASPEN_MAP_NS_DRAM1,
 	RDASPEN_MAP_NS_DRAM2,
 	RDASPEN_MAP_TRUSTED_NVCTR,
+#endif
+#if IMAGE_BL31
+#if PFDI_SUPPORT
+	MAP_SBIST_MEM(0),
+	MAP_SBIST_MEM(1),
+	MAP_SBIST_MEM(2),
+	MAP_SBIST_MEM(3),
+#endif
 #endif
 	RDASPEN_MAP_S_DRAM,
 	{0}
