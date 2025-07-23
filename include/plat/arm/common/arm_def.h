@@ -60,7 +60,12 @@
 #endif /* PLAT_ARM_TRUSTED_SRAM_BASE */
 
 #define ARM_SHARED_RAM_BASE		ARM_TRUSTED_SRAM_BASE
+
+#ifdef PLAT_ARM_SHARED_RAM_SIZE
+#define ARM_SHARED_RAM_SIZE		PLAT_ARM_SHARED_RAM_SIZE
+#else
 #define ARM_SHARED_RAM_SIZE		UL(0x00001000)	/* 4 KB */
+#endif /* PLAT_ARM_SHARED_RAM_SIZE */
 
 #if ENABLE_RME
 /* Store level 0 GPT at the top of the Trusted SRAM */
