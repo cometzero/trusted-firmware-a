@@ -21,10 +21,17 @@
 #define ERX_CTRL_CFI_ENABLE			U(1UL << 8)
 #define ERX_CTRL_FI_ENABLE			U(1UL << 3)
 #define ERX_CTRL_ED_ENABLE			U(1UL << 0)
+#define ERX_CTRL_TFPEN_ENABLE			U(1UL << 33)
 
 /* CPU RAS STATUS Register Defines */
 #define ERX_STATUS_V				U(1UL << 30)
 #define ERX_STATUS_CE				U(1UL << 25)
+
+/* RAS Error status register IERR value */
+#define ERX_STATUS_IERR(err_status)		U(((err_status) >> 8) & 0x1F)
+/* RAS Error status register SERR value */
+#define ERX_STATUS_SERR(err_status)		U((err_status) & 0x1F)
+
 /*
  * Timeout Constants for RAS Event Handling
  */

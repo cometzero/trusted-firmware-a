@@ -14,6 +14,50 @@
 #include <lib/extensions/ras.h>
 
 #define CORE_RAM_ERR_RECORD		U(1)
+#define TFP_ERROR_SERR			U(0x1A)
+#define TFP_ERROR_STRING_OFFSET		U(0x4)
+
+/* Flop parity Error strings */
+static const char *tfp_error_strings[] = {
+	"DSIDE",
+	"VECTOR_UNIT",
+	"MMU",
+	"LEVEL_2",
+	"GIC_CPU_INTERFACE",
+	"DBG_TRACE",
+	"ISIDE",
+	"DECODE",
+	"RENAME",
+	"COMMIT",
+	"ISSUE",
+	"IEXECUTE",
+	"AXIS_BRIDGE"
+};
+
+/* Check if the TFP error source value is within valid range */
+static inline bool rdaspen_is_valid_tfp_ierr(uint64_t tfp_source)
+{
+	return ((tfp_source >= TFP_ERROR_STRING_OFFSET) &&
+			(tfp_source < (ARRAY_SIZE(tfp_error_strings)
+					+ TFP_ERROR_STRING_OFFSET)));
+}
+
+static void rdaspen_check_tfp_error(uint64_t err_status)
+{
+	/* Check if the error status indicates a Transient Fault error */
+	if ((err_status & ERX_STATUS_V) &&
+		(ERX_STATUS_SERR(err_status) == TFP_ERROR_SERR)) {
+		/* Check if source of TFP is valid */
+		if (!rdaspen_is_valid_tfp_ierr(ERX_STATUS_IERR(err_status))) {
+			WARN("CPU RAS: TFP Error Detected : Unknown Error\n");
+		} else {
+			/* Prints the TFP error source */
+			WARN("CPU RAS: TFP Error Detected : %s\n",
+				tfp_error_strings[ERX_STATUS_IERR(err_status)
+					- TFP_ERROR_STRING_OFFSET]);
+		}
+	}
+}
 
 void plat_handle_uncontainable_ea(void)
 {
@@ -51,6 +95,10 @@ static void rdaspen_setup_cpu_ras_config(void)
 	reg_erxctlr_el1 = read_erxctlr_el1();
 
 	reg_erxctlr_el1 |= ERX_CTRL_FI_ENABLE | ERX_CTRL_CFI_ENABLE | ERX_CTRL_ED_ENABLE;
+	/* Enable Transient Fault Protection error reporting */
+	reg_erxctlr_el1 |= ERX_CTRL_TFPEN_ENABLE;
+	VERBOSE("RAS: Transient Fault Protection enabled\n");
+
 	write_erxctlr_el1(reg_erxctlr_el1);
 	VERBOSE("RAS: Platform RAS Init on CPU %u : ERXCTLR_EL1=0x%lx successful\n",
 		core_pos, reg_erxctlr_el1);
@@ -103,6 +151,8 @@ static int rdaspen_ras_cpu_intr_handler(
 	}
 
 	WARN("CPU RAS: Error Status value : 0x%lx\n", read_erxstatus_el1());
+
+	rdaspen_check_tfp_error(read_erxstatus_el1());
 
 	/* Initialise Timer with the Timeout value */
 	uint64_t timeout = timeout_init_us(RAS_SYNC_TIMEOUT_US);
