@@ -24,6 +24,33 @@
 		#address-cells = <2>;
 		#size-cells = <0>;
 
+		/*
+		 * The latency and residency numbers below are for illustrative
+		 * purpose only and may vary on actual silicon. These values are
+		 * considered just to demonstrate that the cpuidle governor
+		 * logic works.
+		 */
+		idle-states {
+			entry-method = "psci";
+
+			CPU_SLEEP: cpu-sleep {
+				compatible = "arm,idle-state";
+				arm,psci-suspend-param = <0x0010000>;
+				local-timer-stop;
+				entry-latency-us = <800>;
+				exit-latency-us = <3200>;
+				min-residency-us = <4200>;
+			};
+			CLUSTER_SLEEP: cluster-sleep {
+				compatible = "arm,idle-state";
+				arm,psci-suspend-param = <0x1010000>;
+				local-timer-stop;
+				entry-latency-us = <1000>;
+				exit-latency-us = <3200>;
+				min-residency-us = <4500>;
+			};
+		};
+
 		/* Up to 4 clusters with up to 4 CPU cores in each cluster */
 		CPU_MAP
 		CPUS
