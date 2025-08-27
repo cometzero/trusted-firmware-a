@@ -130,9 +130,22 @@ pfdi_status_t pfdi_pe_test_run(uint64_t start, uint64_t end, uint64_t mode,
 		goto exit;
 	}
 
-	if (start > end || end > test_count || (!IS_VALID_MODE(mode))) {
+	if ((((int64_t)start == -1) != ((int64_t)end == -1)) ||
+		((int64_t)start < -1) ||
+		((int64_t)end < -1) ||
+		((int64_t)start >= 0 && (int64_t)end >= 0 &&
+			(start > end || start >= test_count || end >= test_count)) ||
+			!IS_VALID_MODE(mode)) {
+
 		ret = PFDI_INVALID_PARAMETERS;
+		ERROR("PFDI: Invalid parameters: start=%lld, end=%lld, mode=%llu\n",
+			(int64_t)start, (int64_t)end, mode);
 		goto exit;
+	}
+
+	if ((int64_t)start == -1 && (int64_t)end == -1) {
+		start = 0;
+		end = test_count - 1;
 	}
 
 	ret = pfdi_func_desc.run(start, end, mode, ft_id);
