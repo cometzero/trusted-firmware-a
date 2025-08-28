@@ -19,12 +19,10 @@ endif
 override ARM_FW_CONFIG_LOAD_ENABLE		:=	1
 override ARM_PLAT_MT				:=	1
 override ARM_PLAT_PROVIDES_BL2_MEM_PARAMS	:=	1
-override ARM_RECOM_STATE_ID_ENC			:=	1
 override CSS_LOAD_SCP_IMAGES			:=	0
 override CTX_INCLUDE_AARCH32_REGS		:=	0
 override NEED_BL1				:=	0
 override NEED_BL2U				:=	0
-override PSCI_EXTENDED_STATE_ID			:=	1
 
 # SVE related flags
 override CTX_INCLUDE_FPREGS			:=	1
