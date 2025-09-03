@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, Arm Limited and Contributors. All rights reserved.
+ * Copyright (c) 2024-2025, Arm Limited and Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -23,6 +23,14 @@
  * MHUv3 Wrapper utility macros
  */
 #define IS_ALIGNED(val, align)	(val == ALIGN_UP(val, align))
+
+/*
+ * MHUv3 Trustzone Extension Support macros
+ */
+#define MHU_PBX_FEAT_TZE_SPT_SHIFT 12
+#define MHU_PBX_FEAT_TZE_SPT_MASK GENMASK_32(15, 12)
+#define MHU_PBX_FEAT_TZE_SPT_VAL(val) \
+	(((val) & MHU_PBX_FEAT_TZE_SPT_MASK) >> MHU_PBX_FEAT_TZE_SPT_SHIFT)
 
 /*
  * MHU devices for host:
@@ -459,4 +467,52 @@ size_t mhu_get_max_message_size(void)
 	 * memory size.
 	 */
 	return (num_channels - 1) * sizeof(uint32_t);
+}
+
+/* Check Postbox trustzone extension support */
+bool mhu_v3_x_is_postbox_tz_ext_support_enabled(void)
+{
+	uint32_t reg_val;
+	enum mhu_v3_x_error_t mhu_v3_err;
+	struct mhu_v3_x_dev_t *dev;
+
+	dev = (struct mhu_v3_x_dev_t *)&mhu_hse_dev;
+	if ((dev == NULL) || (dev->base == 0)) {
+		return false;
+	}
+
+	mhu_v3_err = mhu_v3_x_read_feat_support(dev, &reg_val);
+	if (mhu_v3_err != MHU_V_3_X_ERR_NONE) {
+		return false;
+	}
+
+	if (MHU_PBX_FEAT_TZE_SPT_VAL(reg_val) != 0x1) {
+		return false;
+	}
+
+	return true;
+}
+
+/* Check Mailbox trustzone extension support */
+bool mhu_v3_x_is_mailbox_tz_ext_support_enabled(void)
+{
+	uint32_t reg_val;
+	enum mhu_v3_x_error_t mhu_v3_err;
+	struct mhu_v3_x_dev_t *dev;
+
+	dev = (struct mhu_v3_x_dev_t *)&mhu_seh_dev;
+	if ((dev == NULL) || (dev->base == 0)) {
+		return false;
+	}
+
+	mhu_v3_err = mhu_v3_x_read_feat_support(dev, &reg_val);
+	if (mhu_v3_err != MHU_V_3_X_ERR_NONE) {
+		return false;
+	}
+
+	if (MHU_PBX_FEAT_TZE_SPT_VAL(reg_val) != 0x1) {
+		return false;
+	}
+
+	return true;
 }

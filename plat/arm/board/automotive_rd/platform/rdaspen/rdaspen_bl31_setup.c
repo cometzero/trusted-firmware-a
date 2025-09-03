@@ -5,14 +5,17 @@
  */
 
 #include <assert.h>
-#include <drivers/arm/css/css_mhu_doorbell.h>
-#include <drivers/arm/css/css_scp.h>
-#include <drivers/generic_delay_timer.h>
-#include <drivers/arm/css/scmi.h>
-#include <drivers/arm/dsu.h>
-#include <drivers/arm/pfdi_mod.h>
+
 #include <plat/arm/common/plat_arm.h>
 #include <plat/common/platform.h>
+
+#include <drivers/arm/css/css_mhu_doorbell.h>
+#include <drivers/arm/css/css_scp.h>
+#include <drivers/arm/css/scmi.h>
+#include <drivers/arm/dsu.h>
+#include <drivers/arm/mhu.h>
+#include <drivers/arm/pfdi_mod.h>
+#include <drivers/generic_delay_timer.h>
 #include <rdaspen_ras.h>
 
 #define SCMI_PFDI_MONITOR_CHANNEL_BASE	1U
@@ -61,6 +64,13 @@ static scmi_channel_plat_info_t plat_rd_scmi_pfdi_monitor_info[] = {
 scmi_channel_plat_info_t *plat_css_get_scmi_info(unsigned int channel_id)
 {
 	assert(channel_id == 0U);
+
+	/* If TZ Extension support enabled, update PLAT_CSS_MHU_BASE offset */
+	if (mhu_v3_x_is_postbox_tz_ext_support_enabled()) {
+		plat_rd_scmi_info[channel_id].db_reg_addr +=
+			MHU_SECURITY_CONTROL_BLOCK_OFFSET;
+	}
+
 	return &plat_rd_scmi_info[channel_id];
 }
 
@@ -125,6 +135,12 @@ int plat_spmd_handle_group0_interrupt(uint32_t intid)
 scmi_channel_plat_info_t *plat_css_get_scmi_pfdi_monitor_info(unsigned int channel_id)
 {
 	assert(channel_id < PLAT_ARM_SCMI_PFDI_MONITOR_CHANNEL_COUNT);
+
+	if (mhu_v3_x_is_postbox_tz_ext_support_enabled()) {
+		plat_rd_scmi_pfdi_monitor_info[channel_id].db_reg_addr +=
+			MHU_SECURITY_CONTROL_BLOCK_OFFSET;
+	}
+
 	return &plat_rd_scmi_pfdi_monitor_info[channel_id];
 }
 #endif

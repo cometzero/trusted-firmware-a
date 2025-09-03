@@ -8,8 +8,11 @@
 #ifndef MHU_H
 #define MHU_H
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+
+#define MHU_SECURITY_CONTROL_BLOCK_OFFSET UL(0x10000)
 
 /**
  * Generic MHU error enumeration types.
@@ -91,5 +94,15 @@ enum mhu_error_t mhu_receive_data(uint8_t *receive_buffer, size_t *size);
  * Returns The amount of bytes that can be sent or received in a single message.
  */
 size_t mhu_get_max_message_size(void);
+
+/**
+ * Returns true if Postbox trustzone extension support is enabled.
+ */
+bool mhu_v3_x_is_postbox_tz_ext_support_enabled(void);
+
+/**
+ * Returns true if Mailbox trustzone extension support is enabled.
+ */
+bool mhu_v3_x_is_mailbox_tz_ext_support_enabled(void);
 
 #endif /* MHU_H */

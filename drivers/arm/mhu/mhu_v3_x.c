@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, Arm Limited and Contributors. All rights reserved.
+ * Copyright (c) 2024-2025, Arm Limited and Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -472,4 +472,33 @@ enum mhu_v3_x_error_t mhu_v3_x_channel_interrupt_clear(
 	pdbcw_reg[channel].pdbcw_int_clr |= 0x1;
 
 	return MHU_V_3_X_ERR_NONE;
+}
+
+enum mhu_v3_x_error_t
+mhu_v3_x_read_feat_support(const struct mhu_v3_x_dev_t *dev,
+			   uint32_t *feat_spt0)
+{
+	enum mhu_v3_x_error_t status;
+	union _mhu_v3_x_frame_t *mhu;
+
+	status = get_dev_base(dev, &mhu);
+	if (status != MHU_V_3_X_ERR_NONE) {
+		return status;
+	}
+
+	if (dev->frame == MHU_V3_X_PBX_FRAME) {
+		*feat_spt0 = ((struct _mhu_v3_x_pbx_ctrl_reg_t *)&(
+				      mhu->pbx_frame.pbx_ctrl_page))
+				     ->pbx_feat_spt0;
+
+		return MHU_V_3_X_ERR_NONE;
+	} else if (dev->frame == MHU_V3_X_MBX_FRAME) {
+		*feat_spt0 = ((struct _mhu_v3_x_mbx_ctrl_reg_t *)&(
+				      mhu->mbx_frame.mbx_ctrl_page))
+				     ->mbx_feat_spt0;
+
+		return MHU_V_3_X_ERR_NONE;
+	}
+
+	return MHU_V_3_X_ERR_UNSUPPORTED;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, Arm Limited and Contributors. All rights reserved.
+ * Copyright (c) 2024-2025, Arm Limited and Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -222,5 +222,17 @@ enum mhu_v3_x_error_t mhu_v3_x_channel_interrupt_disable(
 enum mhu_v3_x_error_t mhu_v3_x_channel_interrupt_clear(
 	 const struct mhu_v3_x_dev_t *dev, const uint32_t channel,
 	 enum mhu_v3_x_channel_type_t ch_type);
+
+/**
+ * Read FEAT_SPT0 register value
+ *
+ * dev			MHU device struct mhu_v3_x_dev_t
+ * feat_spt0		feature support 0 register value
+ *
+ * Returns mhu_v3_x_error_t error code
+ */
+enum mhu_v3_x_error_t
+mhu_v3_x_read_feat_support(const struct mhu_v3_x_dev_t *dev,
+			   uint32_t *feat_spt0);
 
 #endif /* MHU_V3_X_H */
