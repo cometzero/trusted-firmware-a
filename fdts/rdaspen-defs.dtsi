@@ -21,6 +21,7 @@
 		d-cache-size = <0x10000>;					\
 		d-cache-line-size = <0x40>;					\
 		d-cache-sets = <0x100>;						\
+		clocks = <&scmi_dvfs cluster_num>;				\
 		cpu-idle-states = <&CPU_SLEEP &CLUSTER_SLEEP>;			\
 		next-level-cache = <&CL##cluster_num##_L2_##cluster_core_num>;	\
 		CL##cluster_num##_L2_##cluster_core_num: l2-cache##cpu_num {	\

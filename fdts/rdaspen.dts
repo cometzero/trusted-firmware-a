@@ -206,4 +206,55 @@
 		cpu_on = <0xc4000003>;
 	};
 
+	sram: sram@104000 {
+		compatible = "mmio-sram";
+		reg = <0x0 PLAT_ARM_MHU_NS_SHARED_SRAM_BASE 0x0 PLAT_ARM_MHU_NS_SHARED_SRAM_SIZE>;
+		#address-cells = <1>;
+		#size-cells = <1>;
+		ranges = <0 0x0 PLAT_ARM_MHU_NS_SHARED_SRAM_BASE PLAT_ARM_MHU_NS_SHARED_SRAM_SIZE>;
+
+		scmi_shmem_tx: scp-shmem@0 {
+			compatible = "arm,scmi-shmem";
+			reg = <0x0 0x100>;
+		};
+		scmi_shmem_rx: scp-shmem@100 {
+			compatible = "arm,scmi-shmem";
+			reg = <0x100 0x100>;
+		};
+	};
+
+	mbox_db_tx: mhu@40020000 {
+		compatible = "arm,mhuv3";
+		reg = <0x0 AP_SI_NON_SECURE_MHU_V3_TX_BASE 0x0 MHU_V3_TX_RX_FRAME_SIZE>;
+		clocks = <&soc_clk24mhz>;
+		clock-names = "apb_pclk";
+		#mbox-cells = <3>;
+	};
+
+	mbox_db_rx: mhu@40060000 {
+		compatible = "arm,mhuv3";
+		reg = <0x0 AP_SI_NON_SECURE_MHU_V3_RX_BASE 0x0 MHU_V3_TX_RX_FRAME_SIZE>;
+		clocks = <&soc_clk24mhz>;
+		clock-names = "apb_pclk";
+		#mbox-cells = <3>;
+		interrupts = <GIC_SPI 113 IRQ_TYPE_LEVEL_HIGH>;
+		interrupt-names = "combined";
+	};
+
+	firmware {
+		scmi {
+			compatible = "arm,scmi";
+			mbox-names = "tx", "rx";
+			mboxes = <&mbox_db_tx 0 0 0 &mbox_db_rx 0 0 0 &mbox_db_rx 0 0 2>;
+			shmem = <&scmi_shmem_tx &scmi_shmem_rx>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			scmi_dvfs: protocol@13 {
+				reg = <0x13>;
+				#clock-cells = <1>;
+			};
+		};
+	};
+
 };
