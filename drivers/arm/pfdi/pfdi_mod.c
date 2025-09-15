@@ -223,6 +223,18 @@ pfdi_status_t pfdi_pe_features(uint32_t fid)
 	return PFDI_SUCCESS;
 }
 
+pfdi_status_t pfdi_pe_fw_check(void)
+{
+	pfdi_status_t ret;
+
+	ret = check_force_error(PFDI_FW_CHECK);
+	if (ret != RESERVED_ERROR_ID)
+		return ret;
+
+	/* No firmware checks implemented yet */
+	return PFDI_SUCCESS;
+}
+
 pfdi_status_t pfdi_pe_force_error(const uint32_t fid, const pfdi_status_t error_id)
 {
 	force_err_inject_t *state = &error_state[plat_my_core_pos()];

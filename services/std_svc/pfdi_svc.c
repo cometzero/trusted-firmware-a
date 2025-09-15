@@ -76,7 +76,8 @@ uint64_t pfdi_smc_handler(uint32_t smc_fid,
 		SMC_RET5(handle, ret, 0U, 0U, 0U, 0U);
 		break;
 	case PFDI_FW_CHECK:
-		SMC_RET5(handle, PFDI_SUCCESS, 0U, 0U, 0U, 0U);
+		ret = pfdi_pe_fw_check();
+		SMC_RET5(handle, ret, 0U, 0U, 0U, 0U);
 		break;
 	case PFDI_FORCE_ERROR:
 		ret = pfdi_pe_force_error((uint32_t)x1, (pfdi_status_t)x2);

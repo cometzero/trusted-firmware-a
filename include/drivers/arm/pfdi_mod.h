@@ -187,6 +187,13 @@ pfdi_status_t pfdi_version(uint64_t *pfdi_version);
 pfdi_status_t pfdi_pe_features(uint32_t fid);
 
 /**
+ * Firmware check on request.
+ *
+ * @return	PFDI_SUCCESS on success or PFDI_ERROR on failure.
+ */
+pfdi_status_t pfdi_pe_fw_check(void);
+
+/**
  * Force error on request.
  *
  * @param[in] fid		Targeted smc function id.
