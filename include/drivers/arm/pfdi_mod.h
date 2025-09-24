@@ -54,23 +54,30 @@ enum pfdi_execution_mode
 		PFDI_VERSION_MINOR_MASK)		\
 		<< PFDI_VERSION_MINOR_SHIFT))
 
-/* The fields are packed in the following order:
- * Bits [63:32] -> RESERVED
- * Bits [31:24] -> PFDI_VENDOR_ID
- * Bits [23:20] -> RESERVED
- * Bits [19:16] -> PFDI_LIBRARY_ID
- * Bits [15:08] -> PFDI_MAJOR_VERSION
- * Bits [07:00] -> PFDI_MINOR_VERSION
- */
-#define PACK_VENDOR_ID(version)						\
-	do								\
-	{								\
-		*(version) =						\
-		    ((uint64_t)((PFDI_VENDOR_ID) & 0xFFUL) << 24) |	\
-		    ((uint64_t)((PFDI_LIBRARY_ID) & 0xFUL) << 16) |	\
-		    ((uint64_t)((PFDI_MAJOR_VERSION) & 0xFFUL) << 8) |	\
-		    ((uint64_t)((PFDI_MINOR_VERSION) & 0xFFUL));	\
-	} while (0)
+/* Allowed bits: [31:24]=vendor, [19:16]=impl, [15:8]=major, [7:0]=minor */
+#define _PFDI_VERSION_ALLOWED_MASK  UINT64_C(0x00000000FF0FFFFF)
+
+#define PACK_VENDOR_ID(version)									\
+	do {											\
+		uint32_t _vendor = (uint32_t)(PFDI_VENDOR_ID);      /* 8 bits  */		\
+		uint32_t _impl   = (uint32_t)(PFDI_LIBRARY_ID);     /* 4 bits  */		\
+		uint32_t _major  = (uint32_t)(PFDI_MAJOR_VERSION);  /* 8 bits  */		\
+		uint32_t _minor  = (uint32_t)(PFDI_MINOR_VERSION);  /* 8 bits  */		\
+												\
+		if (((_vendor & ~0xFFu) != 0u) ||						\
+			((_impl   & ~0x0Fu) != 0u) ||						\
+			((_major  & ~0xFFu) != 0u) ||						\
+			((_minor  & ~0xFFu) != 0u)) {						\
+			*(version) = 0ull;  /* On error: all zero */				\
+		} else {									\
+			uint64_t _v = 0;							\
+			_v |= ((uint64_t)_vendor & 0xFFu) << 24;   /* [31:24] */		\
+			_v |= ((uint64_t)_impl   & 0x0Fu) << 16;   /* [19:16] */		\
+			_v |= ((uint64_t)_major  & 0xFFu) << 8;    /* [15:8]  */		\
+			_v |= ((uint64_t)_minor  & 0xFFu) << 0;    /* [7:0]   */		\
+			*(version) = _v & _PFDI_VERSION_ALLOWED_MASK; /* zero reserved */	\
+		}										\
+    } while (0)
 
 #define IS_VALID_MODE(mode) \
 	((mode) == PFDI_ONL_MODE || (mode) == PFDI_OOR_MODE)

@@ -112,6 +112,9 @@ pfdi_status_t pfdi_pe_test_part_count(uint64_t *tc_size)
 	if (ret != RESERVED_ERROR_ID)
 		return ret;
 
+	if (tc_size == NULL)
+		return PFDI_INVALID_PARAMETERS;
+
 	return pfdi_func_desc.count(tc_size);
 }
 
@@ -135,7 +138,7 @@ pfdi_status_t pfdi_pe_test_run(uint64_t start, uint64_t end, uint64_t mode,
 		((int64_t)end < -1) ||
 		((int64_t)start >= 0 && (int64_t)end >= 0 &&
 			(start > end || start >= test_count || end >= test_count)) ||
-			!IS_VALID_MODE(mode)) {
+			!IS_VALID_MODE(mode) || ft_id == NULL) {
 
 		ret = PFDI_INVALID_PARAMETERS;
 		ERROR("PFDI: Invalid parameters: start=%lld, end=%lld, mode=%llu\n",
@@ -162,12 +165,15 @@ pfdi_status_t pfdi_pe_test_id(uint64_t *lib_version)
 {
 	pfdi_status_t ret;
 
+	if (lib_version)
+		*lib_version = 0ULL;
+
 	ret = check_force_error(PFDI_PE_TEST_ID);
 	if (ret != RESERVED_ERROR_ID)
 		return ret;
 
 	if (lib_version == NULL)
-		return PFDI_UNKNOWN;
+		return PFDI_INVALID_PARAMETERS;
 
 #ifndef PACK_VENDOR_ID
 	return PFDI_UNKNOWN;
@@ -186,6 +192,11 @@ pfdi_status_t pfdi_pe_test_result(uint64_t *ft_id)
 	if (ret != RESERVED_ERROR_ID)
 		return ret;
 
+	if (ft_id == NULL)
+		return PFDI_INVALID_PARAMETERS;
+
+	/* Initialize to no fault found */
+	*ft_id = 0ULL;
 	cpu_num = plat_my_core_pos();
 	return pfdi_func_desc.result(cpu_num, ft_id);
 }
@@ -199,7 +210,7 @@ pfdi_status_t pfdi_version(uint64_t *pfdi_version)
 		return ret;
 
 	if (pfdi_version == NULL)
-		return PFDI_NOT_SUPPORTED;
+		return PFDI_INVALID_PARAMETERS;
 
 #ifndef PFDI_VENDOR_VERSION
 	return PFDI_NOT_SUPPORTED;
@@ -216,6 +227,10 @@ pfdi_status_t pfdi_pe_features(uint32_t fid)
 	ret = check_force_error(PFDI_FEATURES);
 	if (ret != RESERVED_ERROR_ID)
 		return ret;
+
+	if (!is_pfdi_fid(fid)) {
+		return PFDI_INVALID_PARAMETERS;
+	}
 
 	if (!IS_FEATURE_SUPPORTED(fid))
 		return PFDI_NOT_SUPPORTED;
@@ -241,12 +256,16 @@ pfdi_status_t pfdi_pe_force_error(const uint32_t fid, const pfdi_status_t error_
 	pfdi_status_t ret;
 
 	if (!IS_FEATURE_SUPPORTED(fid))
-		return PFDI_ERROR;
+		return PFDI_NOT_SUPPORTED;
+
+	if (!is_pfdi_fid(fid)) {
+		return PFDI_INVALID_PARAMETERS;
+	}
 
 	if (error_id < PFDI_TEST_COUNT_ZERO ||
 		error_id > PFDI_SUCCESS ||
 		error_id == RESERVED_ERROR_ID)
-		return PFDI_ERROR;
+		return PFDI_INVALID_PARAMETERS;
 
 	ret = check_force_error(PFDI_FORCE_ERROR);
 	if (ret != RESERVED_ERROR_ID)
@@ -272,6 +291,10 @@ pfdi_status_t pfdi_pe_oor_test_run(void)
 {
 	pfdi_status_t ret;
 	uint64_t ft_id, tc_size;
+
+	ret = check_force_error(PFDI_FW_CHECK);
+	if (ret != RESERVED_ERROR_ID)
+		return ret;
 
 	/*
 	 * Make sure that the OoR PFDI was not ran before,

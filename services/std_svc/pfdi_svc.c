@@ -25,7 +25,7 @@ uint64_t pfdi_smc_handler(uint32_t smc_fid,
 			  u_register_t flags)
 {
 	switch (smc_fid) {
-		uint64_t ft_id;
+		uint64_t ft_id = 0ULL;
 		pfdi_status_t ret;
 	case PFDI_VERSION:
 		uint64_t version = 0;
