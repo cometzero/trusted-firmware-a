@@ -6,9 +6,18 @@
 
 #include <assert.h>
 #include <drivers/arm/pfdi_mod.h>
+#include <drivers/delay_timer.h>
 #include <plat/arm/common/plat_arm.h>
 #include <plat/common/platform.h>
 #include <services/pfdi_svc.h>
+
+#ifndef PFDI_CPU_OFF_RETRY
+/* 0 = wait forever; >0 = retry count (retries * PFDI_OFF_RETRY_US µs) */
+#define PFDI_CPU_OFF_RETRY   0U
+#endif
+#ifndef PFDI_OFF_RETRY_US
+#define PFDI_OFF_RETRY_US    10U
+#endif
 
 /**
  * PFDI Force error records
@@ -20,6 +29,40 @@ typedef struct {
 } force_err_inject_t;
 
 static force_err_inject_t error_state[PLATFORM_CORE_COUNT];
+
+/*
+ * Wait until the CPU is OFF.
+ * Policy: return only on OFF; panic on PSCI error or bounded-timeout.
+ */
+static void wait_cpu_off(u_register_t mpidr, int cpu_num)
+{
+	unsigned int retries = PFDI_CPU_OFF_RETRY;
+	int state = AFF_STATE_ON;
+
+	for (;;) {
+		state = psci_affinity_info(mpidr, MPIDR_AFFLVL0);
+
+		if (state == AFF_STATE_OFF) {
+			return;
+		}
+		if (state < 0) {
+			ERROR("PFDI: CPU %d (mpidr=0x%lx) PSCI error)\n",
+				cpu_num, mpidr, state);
+			panic();
+		}
+
+		/* Optional timeout: only counts down if nonzero, Platform can
+		 * set PFDI_CPU_OFF_RETRY == 0 for infinite wait
+		 */
+		if (retries && --retries == 0) {
+			ERROR("PFDI: timeout waiting for Core %d (mpidr=0x%lx) to go OFF (state=%d)\n",
+				cpu_num, mpidr, state);
+			panic();
+		}
+
+		udelay(PFDI_OFF_RETRY_US);
+	}
+}
 
 void plat_pfdi_pe_init(void)
 {
@@ -84,6 +127,9 @@ void plat_pfdi_pe_init(void)
 			} else {
 				INFO("PFDI: OoR tests on core %d succeeded.\n", cpu_num);
 			}
+
+			/* proceed only if  PE is fully powered down (AFF_STATE_OFF) */
+			wait_cpu_off(mpidr, cpu_num);
 		}
 	}
 }
