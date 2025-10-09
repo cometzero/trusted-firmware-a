@@ -101,7 +101,7 @@
 			ranges = <0x0 0x0 0x1a810000 0x00030000>;
 
 			frame@20000 {
-				frame-number = <1>;
+				frame-number = <0>;
 				interrupts = <GIC_SPI 49 IRQ_TYPE_LEVEL_HIGH>;
 				reg = <0x20000 0x10000>;
 			};

@@ -42,7 +42,7 @@
 #define PLAT_ARM_SYS_TIMCTL_BASE		UL(0x1A810000)
 #define PLAT_ARM_SYS_CNT_BASE_S			UL(0x1A820000)
 #define PLAT_ARM_SYS_CNT_BASE_NS		UL(0x1A830000)
-#define PLAT_ARM_NSTIMER_FRAME_ID		U(1)
+#define PLAT_ARM_NSTIMER_FRAME_ID		U(0)
 
 #include <plat/arm/common/arm_def.h>
 #include <plat/arm/css/common/css_def.h>
