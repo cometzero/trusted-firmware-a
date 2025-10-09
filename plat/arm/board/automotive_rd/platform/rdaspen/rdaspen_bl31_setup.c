@@ -61,6 +61,28 @@ static scmi_channel_plat_info_t plat_rd_scmi_pfdi_monitor_info[] = {
 };
 #endif
 
+#if USE_GIC_DRIVER == 3
+static const uintptr_t rdaspen_gicr_base_addrs[] = {
+	GICR_BASE_VIEW0_0_0,
+	GICR_BASE_VIEW0_0_1,
+	GICR_BASE_VIEW0_0_2,
+	GICR_BASE_VIEW0_0_3,
+	GICR_BASE_VIEW0_1_0,
+	GICR_BASE_VIEW0_1_1,
+	GICR_BASE_VIEW0_1_2,
+	GICR_BASE_VIEW0_1_3,
+	GICR_BASE_VIEW0_2_0,
+	GICR_BASE_VIEW0_2_1,
+	GICR_BASE_VIEW0_2_2,
+	GICR_BASE_VIEW0_2_3,
+	GICR_BASE_VIEW0_3_0,
+	GICR_BASE_VIEW0_3_1,
+	GICR_BASE_VIEW0_3_2,
+	GICR_BASE_VIEW0_3_3,
+	0U				/* Zero Termination */
+};
+#endif
+
 scmi_channel_plat_info_t *plat_css_get_scmi_info(unsigned int channel_id)
 {
 	assert(channel_id == 0U);
@@ -114,7 +136,7 @@ void bl31_platform_setup(void)
 {
 	arm_bl31_platform_setup();
 #if USE_GIC_DRIVER == 3
-	gic_set_gicr_frames(arm_gicr_base_addrs);
+	gic_set_gicr_frames(rdaspen_gicr_base_addrs);
 #endif
 	generic_delay_timer_init();
 	rdaspen_ras_init_per_cpu();
