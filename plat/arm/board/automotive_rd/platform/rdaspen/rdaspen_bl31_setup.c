@@ -19,6 +19,15 @@
 #include <drivers/generic_delay_timer.h>
 #include <rdaspen_ras.h>
 
+/*
+ * MHUv3 Trustzone Extension Support macros
+ */
+#define MHU_FEAT_SPT_OFFSET0		0x10
+#define MHU_PBX_FEAT_TZE_SPT_SHIFT 	12
+#define MHU_PBX_FEAT_TZE_SPT_MASK 	GENMASK_32(15, 12)
+#define MHU_PBX_FEAT_TZE_SPT_VAL(val) 	\
+	(((val) & MHU_PBX_FEAT_TZE_SPT_MASK) >> MHU_PBX_FEAT_TZE_SPT_SHIFT)
+
 #define SCMI_PFDI_MONITOR_CHANNEL_BASE	1U
 
 #define SCMI_PFDI_MONITOR_INFO(channel_id)	\
@@ -84,12 +93,20 @@ static const uintptr_t rdaspen_gicr_base_addrs[] = {
 };
 #endif
 
+static bool is_mhuv3_tze_supported(uintptr_t mhuv3_dev_base)
+{
+	uint32_t feat_spt0 = mmio_read_32(mhuv3_dev_base + MHU_FEAT_SPT_OFFSET0);
+	if (MHU_PBX_FEAT_TZE_SPT_VAL(feat_spt0) == 0x1)
+		return true;
+	return false;
+}
+
 scmi_channel_plat_info_t *plat_css_get_scmi_info(unsigned int channel_id)
 {
 	assert(channel_id == 0U);
 
 	/* If TZ Extension support enabled, update PLAT_CSS_MHU_BASE offset */
-	if (mhu_v3_x_is_postbox_tz_ext_support_enabled()) {
+	if (is_mhuv3_tze_supported(PLAT_CSS_MHU_BASE)) {
 		plat_rd_scmi_info[channel_id].db_reg_addr +=
 			MHU_SECURITY_CONTROL_BLOCK_OFFSET;
 	}
@@ -179,7 +196,7 @@ scmi_channel_plat_info_t *plat_css_get_scmi_pfdi_monitor_info(unsigned int chann
 {
 	assert(channel_id < PLAT_ARM_SCMI_PFDI_MONITOR_CHANNEL_COUNT);
 
-	if (mhu_v3_x_is_postbox_tz_ext_support_enabled()) {
+	if (is_mhuv3_tze_supported(PLAT_CSS_MHU_BASE)) {
 		plat_rd_scmi_pfdi_monitor_info[channel_id].db_reg_addr +=
 			MHU_SECURITY_CONTROL_BLOCK_OFFSET;
 	}
