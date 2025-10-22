@@ -28,6 +28,7 @@ const mmap_region_t plat_arm_mmap[] = {
 	RDASPEN_MAP_TRUSTED_NVCTR,
 #endif
 #if IMAGE_BL31
+	RDASPEN_MAP_CPER_BUF,
 #if PFDI_SUPPORT
 	MAP_SBIST_MEM(0),
 	MAP_SBIST_MEM(1),

@@ -129,6 +129,17 @@ void rdaspen_css_pwr_domain_on_finish(const psci_power_state_t *target_state)
 	rdaspen_ras_init_per_cpu();
 }
 
+/*
+ * Rising-edge SPI: clear any stale pending,
+ * then set to trigger a new edge.
+ */
+static void rdaspen_set_error_notification_irq(unsigned int irq)
+{
+	plat_ic_clear_interrupt_pending(irq);
+	plat_ic_set_interrupt_pending(irq);
+	VERBOSE("RAS: IRQ %u triggered to EL1\n", irq);
+}
+
 static int rdaspen_ras_cpu_intr_handler(
 	const struct err_record_info *err_rec,
 	int probe_data,
@@ -219,6 +230,7 @@ static int rdaspen_ras_cpu_intr_handler(
 	} while (!timeout_elapsed(timeout));
 
 	plat_ic_end_of_interrupt(data->interrupt);
+	rdaspen_set_error_notification_irq(ERROR_NOTIFICATION_IRQ);
 	return 0;
 }
 
