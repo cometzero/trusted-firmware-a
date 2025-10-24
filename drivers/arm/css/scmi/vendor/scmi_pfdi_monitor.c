@@ -152,7 +152,7 @@ void plat_scmi_pfdi_monitor_setup(void)
 
 	NOTICE("Initializing SCMI PFDI Monitor driver\n");
 
-	for (idx = 0; idx < PLAT_ARM_SCMI_PFDI_MONITOR_CHANNEL_COUNT; idx++) {
+	for (idx = 0; idx < PLATFORM_CORE_COUNT; idx++) {
 		scmi_pfdi_monitor_channels[idx].info = plat_css_get_scmi_pfdi_monitor_info(idx);
 		scmi_pfdi_monitor_channels[idx].lock = &scmi_pfdi_monitor_lock[idx];
 		scmi_pfdi_monitor_handles[idx] = scmi_pfdi_monitor_init(&scmi_pfdi_monitor_channels[idx]);
