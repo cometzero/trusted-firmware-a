@@ -442,9 +442,15 @@ void arm_bl31_platform_setup(void)
 
 #endif /* RESET_TO_BL31 */
 
+	dsbsy();
+	isb();
+
 	/* Enable and initialize the System level generic timer */
-	mmio_write_32(ARM_SYS_CNTCTL_BASE + CNTCR_OFF,
-			CNTCR_FCREQ(0U) | CNTCR_EN);
+	// mmio_write_32(ARM_SYS_CNTCTL_BASE + CNTCR_OFF,
+	// 		CNTCR_FCREQ(0U) | CNTCR_EN);
+
+	dsbsy();
+	isb();
 
 	/* Allow access to the System counter timer module */
 	arm_configure_sys_timer();
