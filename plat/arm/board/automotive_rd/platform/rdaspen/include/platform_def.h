@@ -116,6 +116,12 @@
  */
 #define PLAT_CSS_MHU_BASE			UL(0x400A0000)
 
+/*
+ * MHU for PFDI Monitor communication with SCP on Safety Island CL0
+ * Offset to SI_MHU_REGION_BASE: 0x0038_0000.
+ */
+#define PFDI_MONITOR_MHU_BASE			UL(0x403A0000)
+
 /* UART Related Constants */
 #define SOC_CSS_SEC_UART_BASE			UL(0x1A410000)
 #define SOC_CSS_UART_SIZE			SZ_64K

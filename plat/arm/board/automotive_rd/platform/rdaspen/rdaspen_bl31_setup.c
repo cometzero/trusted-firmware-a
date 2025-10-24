@@ -28,13 +28,11 @@
 #define MHU_PBX_FEAT_TZE_SPT_VAL(val) 	\
 	(((val) & MHU_PBX_FEAT_TZE_SPT_MASK) >> MHU_PBX_FEAT_TZE_SPT_SHIFT)
 
-#define SCMI_PFDI_MONITOR_CHANNEL_BASE	1U
-
 #define SCMI_PFDI_MONITOR_INFO(channel_id)	\
 {							\
 		.scmi_mbx_mem = RDASPEN_SCMI_PFDI_MONITOR_BASE + \
 			(RDASPEN_SCMI_PFDI_MONITOR_SIZE_PER_CHANNEL * channel_id), \
-		.db_reg_addr = PLAT_CSS_MHU_BASE + MHU_V3_SENDER_REG_SET(SCMI_PFDI_MONITOR_CHANNEL_BASE + channel_id), \
+		.db_reg_addr = PFDI_MONITOR_MHU_BASE + MHU_V3_SENDER_REG_SET(channel_id), \
 		.db_preserve_mask = 0xfffffffe, \
 		.db_modify_mask = 0x1, \
 		.ring_doorbell = &mhu_ring_doorbell,	\
@@ -196,7 +194,7 @@ scmi_channel_plat_info_t *plat_css_get_scmi_pfdi_monitor_info(unsigned int chann
 {
 	assert(channel_id < PLAT_ARM_SCMI_PFDI_MONITOR_CHANNEL_COUNT);
 
-	if (is_mhuv3_tze_supported(PLAT_CSS_MHU_BASE)) {
+	if (is_mhuv3_tze_supported(PFDI_MONITOR_MHU_BASE)) {
 		plat_rd_scmi_pfdi_monitor_info[channel_id].db_reg_addr +=
 			MHU_SECURITY_CONTROL_BLOCK_OFFSET;
 	}
