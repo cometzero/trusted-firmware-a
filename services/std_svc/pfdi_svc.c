@@ -25,10 +25,15 @@ uint64_t pfdi_smc_handler(uint32_t smc_fid,
 			  u_register_t flags)
 {
 	switch (smc_fid) {
-		uint64_t ft_id = 0ULL;
+		/* Set failed test id = invalid before invoking PFDI Function */
+		uint64_t ft_id = UINT64_MAX;
+		uint64_t x1_ret = 0;
 		pfdi_status_t ret;
 	case PFDI_VERSION:
 		uint64_t version = 0;
+		if ((x1 != 0ULL) || (x2 != 0ULL) || (x3 != 0ULL) || (x4 != 0ULL)) {
+			SMC_RET5(handle, PFDI_INVALID_PARAMETERS, 0U, 0U, 0U, 0U);
+		}
 
 		ret = pfdi_version(&version);
 		if (ret == PFDI_SUCCESS)
@@ -37,6 +42,10 @@ uint64_t pfdi_smc_handler(uint32_t smc_fid,
 		SMC_RET5(handle, ret, 0U, 0U, 0U, 0U);
 		break;
 	case PFDI_FEATURES:
+		if ((x2 != 0ULL) || (x3 != 0ULL) || (x4 != 0ULL)) {
+			SMC_RET5(handle, PFDI_INVALID_PARAMETERS, 0U, 0U, 0U, 0U);
+		}
+
 		ret = pfdi_pe_features((uint32_t)x1);
 		if (ret == PFDI_SUCCESS)
 			SMC_RET5(handle, PFDI_SUCCESS, 0U, 0U, 0U, 0U);
@@ -45,6 +54,9 @@ uint64_t pfdi_smc_handler(uint32_t smc_fid,
 		break;
 	case PFDI_PE_TEST_ID:
 		uint64_t lib_version = 0;
+		if ((x1 != 0ULL) || (x2 != 0ULL) || (x3 != 0ULL) || (x4 != 0ULL)) {
+			SMC_RET5(handle, PFDI_INVALID_PARAMETERS, 0U, 0U, 0U, 0U);
+		}
 
 		ret = pfdi_pe_test_id(&lib_version);
 		if (ret != PFDI_SUCCESS)
@@ -54,6 +66,9 @@ uint64_t pfdi_smc_handler(uint32_t smc_fid,
 		break;
 	case PFDI_PE_TEST_PART_COUNT:
 		uint64_t count;
+		if ((x1 != 0ULL) || (x2 != 0ULL) || (x3 != 0ULL) || (x4 != 0ULL)) {
+			SMC_RET5(handle, PFDI_INVALID_PARAMETERS, 0U, 0U, 0U, 0U);
+		}
 
 		ret = pfdi_pe_test_part_count(&count);
 		if (ret == PFDI_SUCCESS)
@@ -62,24 +77,46 @@ uint64_t pfdi_smc_handler(uint32_t smc_fid,
 		SMC_RET5(handle, ret, 0U, 0U, 0U, 0U);
 		break;
 	case PFDI_PE_TEST_RUN:
+		if ((x3 != 0ULL) || (x4 != 0ULL)) {
+			SMC_RET5(handle, PFDI_INVALID_PARAMETERS, 0U, 0U, 0U, 0U);
+		}
+
 		ret = pfdi_pe_test_run(x1, x2, PFDI_ONL_MODE, &ft_id);
-		if (ret == PFDI_FAULT_FOUND)
-			SMC_RET5(handle, PFDI_FAULT_FOUND, ft_id, 0U, 0U, 0U);
+		if (ret == PFDI_FAULT_FOUND) {
+			/* Test has failed, but check if ft_id is updated */
+			x1_ret = (ft_id == UINT64_MAX) ? PFDI_UNKNOWN : ft_id;
+			SMC_RET5(handle, PFDI_FAULT_FOUND, x1_ret, 0U, 0U, 0U);
+		}
 
 		SMC_RET5(handle, ret, 0U, 0U, 0U, 0U);
 		break;
 	case PFDI_PE_TEST_RESULT:
+		if ((x1 != 0ULL) || (x2 != 0ULL) || (x3 != 0ULL) || (x4 != 0ULL)) {
+			SMC_RET5(handle, PFDI_INVALID_PARAMETERS, 0U, 0U, 0U, 0U);
+		}
+
 		ret = pfdi_pe_test_result(&ft_id);
-		if (ret == PFDI_FAULT_FOUND)
-			SMC_RET5(handle, PFDI_FAULT_FOUND, ft_id, 0U, 0U, 0U);
+		if (ret == PFDI_FAULT_FOUND) {
+			/* Test has failed, but check if ft_id is updated */
+			x1_ret = (ft_id == UINT64_MAX) ? PFDI_UNKNOWN : ft_id;
+			SMC_RET5(handle, PFDI_FAULT_FOUND, x1_ret, 0U, 0U, 0U);
+		}
 
 		SMC_RET5(handle, ret, 0U, 0U, 0U, 0U);
 		break;
 	case PFDI_FW_CHECK:
+		if ((x1 != 0ULL) || (x2 != 0ULL) || (x3 != 0ULL) || (x4 != 0ULL)) {
+			SMC_RET5(handle, PFDI_INVALID_PARAMETERS, 0U, 0U, 0U, 0U);
+		}
+
 		ret = pfdi_pe_fw_check();
 		SMC_RET5(handle, ret, 0U, 0U, 0U, 0U);
 		break;
 	case PFDI_FORCE_ERROR:
+		if ((x3 != 0ULL) || (x4 != 0ULL)) {
+			SMC_RET5(handle, PFDI_INVALID_PARAMETERS, 0U, 0U, 0U, 0U);
+		}
+
 		ret = pfdi_pe_force_error((uint32_t)x1, (pfdi_status_t)x2);
 		SMC_RET5(handle, ret, 0U, 0U, 0U, 0U);
 		break;

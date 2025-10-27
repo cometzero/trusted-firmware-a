@@ -302,7 +302,7 @@ pfdi_status_t pfdi_pe_force_error(const uint32_t fid, const pfdi_status_t error_
 	pfdi_status_t ret;
 
 	if (!IS_FEATURE_SUPPORTED(fid))
-		return PFDI_NOT_SUPPORTED;
+		return PFDI_INVALID_PARAMETERS;
 
 	if (!is_pfdi_fid(fid)) {
 		return PFDI_INVALID_PARAMETERS;
