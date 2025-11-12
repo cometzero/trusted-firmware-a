@@ -330,19 +330,14 @@ size_t cper_write_cpu_record(void *buf, size_t buf_size)
 	return size;
 }
 
-static void print_guid(const struct efi_guid *g)
+static void print_guid(struct efi_guid g)
 {
-	if (g == NULL) {
-		WARN("CPER: null GUID pointer\n");
-		return;
-	}
-
 	VERBOSE("  SectionType   = {%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x}\n",
-		g->time_low, g->time_mid, g->time_hi_and_version,
-		g->clock_seq_and_node[0], g->clock_seq_and_node[1],
-		g->clock_seq_and_node[2], g->clock_seq_and_node[3],
-		g->clock_seq_and_node[4], g->clock_seq_and_node[5],
-		g->clock_seq_and_node[6], g->clock_seq_and_node[7]);
+		g.time_low, g.time_mid, g.time_hi_and_version,
+		g.clock_seq_and_node[0], g.clock_seq_and_node[1],
+		g.clock_seq_and_node[2], g.clock_seq_and_node[3],
+		g.clock_seq_and_node[4], g.clock_seq_and_node[5],
+		g.clock_seq_and_node[6], g.clock_seq_and_node[7]);
 }
 
 static void print_cache_error_info(uint64_t info)
@@ -397,7 +392,7 @@ print_data_entry_header(const struct ACPI_GENERIC_ERROR_DATA_ENTRY_HEADER *de)
 		return;
 	}
 	VERBOSE("DataEntry:\n");
-	print_guid(&de->SectionType);
+	print_guid(de->SectionType);
 	VERBOSE("  ErrorSeverity = %u\n", de->ErrorSeverity);
 	VERBOSE("  Revision      = 0x%04x\n", de->Revision);
 	VERBOSE("  ValidationBits= 0x%02x\n", de->ValidationBits);

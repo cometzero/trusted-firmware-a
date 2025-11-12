@@ -67,23 +67,9 @@ void plat_handle_uncontainable_ea(void)
 	INFO("RAS: Uncontainable RAS Error Handler (EL3)\n");
 	VERBOSE("RAS: ESR_EL3 = 0x%lx (EC = 0x%lx, FSC = 0x%lx)\n",
 		esr, (esr >> 26) & 0x3F, esr & 0x3F);
-
-	int ret = ras_ea_handler(0, esr, NULL, NULL, 0);
-
-	if (ret == 0) {
-		ERROR("RAS: Uncontainable RAS Error has no registered handler.\n");
-		panic();
-	}
+	/* There is no mitigation to UC errors and platform must panic */
+	panic();
 }
-
-/* This is a dummy implementation of probing on Uncontainable Errors required for handling EA */
-static int32_t rdaspen_ras_record_probe(const struct err_record_info *info,
-					int *probe_data)
-{
-	/* Skip probing since fault is probed in Handler */
-	return 1;
-}
-
 
 /* Initialise CPU RAS features for FHI configuration */
 static void rdaspen_setup_cpu_ras_config(void)
@@ -95,7 +81,9 @@ static void rdaspen_setup_cpu_ras_config(void)
 	write_errselr_el1(CORE_RAM_ERR_RECORD);
 	reg_erxctlr_el1 = read_erxctlr_el1();
 
-	reg_erxctlr_el1 |= ERX_CTRL_FI_ENABLE | ERX_CTRL_CFI_ENABLE | ERX_CTRL_ED_ENABLE;
+	/* Enable FI, CFI, UI for all configuration */
+	reg_erxctlr_el1 |= ERX_CTRL_UI_ENABLE | ERX_CTRL_FI_ENABLE | ERX_CTRL_CFI_ENABLE |
+			   ERX_CTRL_ED_ENABLE;
 	/* Enable Transient Fault Protection error reporting */
 	reg_erxctlr_el1 |= ERX_CTRL_TFPEN_ENABLE;
 	VERBOSE("RAS: Transient Fault Protection enabled\n");
@@ -146,7 +134,7 @@ static int rdaspen_ras_cpu_intr_handler(
 	int probe_data,
 	const struct err_handler_data *const data)
 {
-	uint32_t errx_status, mhuv3_poll_status;
+	uint32_t errx_status;
 	(void)err_rec;
 	(void)probe_data;
 
@@ -176,50 +164,10 @@ static int rdaspen_ras_cpu_intr_handler(
 
 	rdaspen_check_tfp_error(read_erxstatus_el1());
 
-	/* Initialise Timer with the Timeout value */
-	uint64_t timeout = timeout_init_us(RAS_SYNC_TIMEOUT_US);
-
-	/* Wait for Doorbell from SI - Make sure the SI have read the record */
-	do {
-		mhuv3_poll_status = mmio_read_32(RAS_SYNC_MHU_DB_STAT_REG_ADDR);
-		if (mhuv3_poll_status & RAS_MHU_DB_MOD_MASK) {
-			/* Clear the door bell immediately */
-			/*
-			 * NOTE: On FVP platforms, SI Cluster 0 doorbell interrupt handler is
-			 * appreciably slower than on real hardware (it runs serially with
-			 * the AP rather than in (true parallel), which can cause SI Cluster 0
-			 * to remain blocked until timeout.
-			 *
-			 * if ACK (doorbell) is delayed by any verbose commands. To avoid
-			 * this, we clear and then send the MHU doorbell ,immediately
-			 * before issuing further commands.
-			 *
-			 * This is an FVP-specific timing optimization; real hardware
-			 * implementations
-			 * may not require it. Later on we can guard this behavior with a macro
-			 * (e.g. CONFIG_PLATFORM_FVP)
-			 * So that on non-FVP platforms the doorbell send can occur later if
-			 * desired.
-			 */
-			mmio_write_32(RAS_SYNC_MHU_DB_STAT_CLR_ADDR, RAS_MHU_DB_MOD_MASK);
-			errx_status = read_erxstatus_el1();
-			write_erxstatus_el1(errx_status);
-			clear_cpu_erx_misc0_register();
-			/* Send an Ack to SI Cluster 0 about clearing the error record */
-			MHU_RING_DOORBELL(RAS_SYNC_MHU_DB_SEND_REG_ADDR, RAS_MHU_DB_MOD_MASK,
-					  RAS_MHU_DB_PRESERVE_MASK);
-			WARN("CPU RAS: Doorbell rung from SI0 0x%x\n", mhuv3_poll_status);
-			break;
-		}
-
-	} while (!timeout_elapsed(timeout));
-
-	/* Clear the Error incase the error wasn't */
-	if ((mhuv3_poll_status & RAS_MHU_DB_MOD_MASK) != RAS_MHU_DB_MOD_MASK) {
-		errx_status = read_erxstatus_el1();
-		write_erxstatus_el1(errx_status);
-		clear_cpu_erx_misc0_register();
-	}
+	/* Clear the Inband Error. Inband Errors are CE and DE */
+	errx_status = read_erxstatus_el1();
+	write_erxstatus_el1(errx_status);
+	clear_cpu_erx_misc0_register();
 
 #if FAULT_INJECTION_SUPPORT
 	/* Pseudo generation registers are cleared to avoid interrupt flood from NS */
@@ -230,16 +178,6 @@ static int rdaspen_ras_cpu_intr_handler(
 
 	WARN("CPU RAS: Error Status Clear Value  : 0x%lx\n", read_erxstatus_el1());
 
-	timeout = timeout_init_us(RAS_SYNC_TIMEOUT_US);
-	/* Wait for SI clearing the SI door bell*/
-	do {
-		mhuv3_poll_status = mmio_read_32(RAS_SYNC_MHU_DB_STAT_SEND_ADDR);
-		if (!(mhuv3_poll_status & RAS_MHU_DB_MOD_MASK)) {
-			WARN("CPU RAS: SI Acknowledges doorbell\n");
-			break;
-		}
-	} while (!timeout_elapsed(timeout));
-
 	plat_ic_end_of_interrupt(data->interrupt);
 	rdaspen_set_error_notification_irq(ERROR_NOTIFICATION_IRQ);
 	return 0;
@@ -247,7 +185,7 @@ static int rdaspen_ras_cpu_intr_handler(
 
 /* RAS error record list definition, used by the common RAS framework. */
 static struct err_record_info plat_err_records[] = {
-	ERR_RECORD_SYSREG_V1(0, 1, rdaspen_ras_record_probe, &rdaspen_ras_cpu_intr_handler, 0),
+	ERR_RECORD_SYSREG_V1(0, 1, NULL, &rdaspen_ras_cpu_intr_handler, 0),
 };
 
 /* RAS error interrupt list definition, used by the common RAS framework. */
