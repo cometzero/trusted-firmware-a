@@ -172,3 +172,18 @@ ifeq ($(ENABLE_RSE_COMMS_BL2),1)
 BL2_SOURCES	+=	${RDASPEN_BASE}/rdaspen_rse_comms.c	\
 			${RSE_COMMS_SOURCES}
 endif
+
+# Default RD-Aspen variant
+TFA_PLATFORM_VARIANT	:= 0
+RD_ASPEN_VARIANT_FVP	:= 0
+RD_ASPEN_VARIANT_RTL	:= 1
+RD_ASPEN_VARIANTS 	:= $(RD_ASPEN_VARIANT_FVP) $(RD_ASPEN_VARIANT_RTL)
+
+ifneq ($(TFA_PLATFORM_VARIANT),$(filter $(TFA_PLATFORM_VARIANT),$(RD_ASPEN_VARIANTS)))
+  $(error TFA_PLATFORM_VARIANT for RD-Aspen should be $(RD_ASPEN_VARIANT_FVP) for FVP or \
+$(RD_ASPEN_VARIANT_RTL) for RTL, currently set to $(TFA_PLATFORM_VARIANT).)
+endif
+
+$(eval $(call add_define,TFA_PLATFORM_VARIANT))
+$(eval $(call add_define,RD_ASPEN_VARIANT_FVP))
+$(eval $(call add_define,RD_ASPEN_VARIANT_RTL))

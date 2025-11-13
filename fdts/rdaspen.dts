@@ -168,6 +168,7 @@
 			interrupts = <GIC_SPI 50 IRQ_TYPE_LEVEL_HIGH>;
 		};
 
+#if (TFA_PLATFORM_VARIANT == RD_ASPEN_VARIANT_FVP)
 		rtc@300d0000 {
 			compatible = "arm,pl031", "arm,primecell";
 			reg = <0x0 0x300d0000 0x0 0x10000>;
@@ -215,6 +216,7 @@
 			reg = <0x0 0x30080000 0x0 0x10000>;
 			interrupts = <GIC_SPI 263 IRQ_TYPE_LEVEL_HIGH>;
 		};
+#endif
 
 		ras-ffh@ffa00000 {
 			compatible = "arm,ras-ffh";
