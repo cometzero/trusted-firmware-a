@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025, Arm Limited. All rights reserved.
+ * Copyright (c) 2025-2026, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -145,19 +145,22 @@ void bl31_platform_setup(void)
 
 void rdaspen_bl31_plat_runtime_setup(void)
 {
-    /* Configure the warm reboot SGI for primary core */
-    css_setup_cpu_pwr_down_intr();
+	/* Initialize the runtime console */
+	arm_console_runtime_init();
+
+	/* Configure the warm reboot SGI for primary core */
+	css_setup_cpu_pwr_down_intr();
 
 #if CSS_SYSTEM_GRACEFUL_RESET
-    /* Register priority level handlers for reboot */
-    ehf_register_priority_handler(PLAT_REBOOT_PRI,
-            css_reboot_interrupt_handler);
+	/* Register priority level handlers for reboot */
+	ehf_register_priority_handler(PLAT_REBOOT_PRI,
+				      css_reboot_interrupt_handler);
 #endif
 }
 
 void bl31_plat_runtime_setup(void)
 {
-    rdaspen_bl31_plat_runtime_setup();
+	rdaspen_bl31_plat_runtime_setup();
 }
 
 #if defined(SPD_spmd) && (SPMC_AT_EL3 == 0)
