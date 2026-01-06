@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025, Arm Limited. All rights reserved.
+ * Copyright (c) 2025-2026, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -222,6 +222,17 @@
 			status-block-size = <0x00010000>;
 			memory-region = <&ras_buffer>;
 			interrupts = <GIC_SPI 57 IRQ_TYPE_EDGE_RISING>;
+		};
+
+		smmu: iommu@1c0000000
+		{
+			compatible = "arm,smmu-v3";
+			reg = <0x1 0xc0000000 0x0 0x8000000>;
+			dma-coherent;
+			#iommu-cells = <1>;
+			interrupts = <GIC_SPI 65 IRQ_TYPE_EDGE_RISING>;
+			interrupt-names = "combined";
+			msi-parent = <&its1 0x10000>;
 		};
 	};
 
