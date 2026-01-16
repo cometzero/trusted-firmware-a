@@ -7,6 +7,7 @@
 #include <assert.h>
 
 #include <plat/arm/common/plat_arm.h>
+#include <plat/arm/css/common/css_pm.h>
 #include <plat/common/platform.h>
 
 #include <drivers/arm/css/css_mhu_doorbell.h>
@@ -140,6 +141,23 @@ void bl31_platform_setup(void)
 #endif
 	generic_delay_timer_init();
 	rdaspen_ras_init_per_cpu();
+}
+
+void rdaspen_bl31_plat_runtime_setup(void)
+{
+    /* Configure the warm reboot SGI for primary core */
+    css_setup_cpu_pwr_down_intr();
+
+#if CSS_SYSTEM_GRACEFUL_RESET
+    /* Register priority level handlers for reboot */
+    ehf_register_priority_handler(PLAT_REBOOT_PRI,
+            css_reboot_interrupt_handler);
+#endif
+}
+
+void bl31_plat_runtime_setup(void)
+{
+    rdaspen_bl31_plat_runtime_setup();
 }
 
 #if defined(SPD_spmd) && (SPMC_AT_EL3 == 0)

@@ -24,7 +24,7 @@ struct rse_mboot_metadata rdaspen_rse_mboot_metadata[] = {
 		.slot = U(8),
 		.signer_id_size = SIGNER_ID_MIN_SIZE,
 		.sw_type = MBOOT_FW_CONFIG_STRING,
-		.lock_measurement = true,
+		.lock_measurement = false,
 		.pk_oid = ZERO_OID
 	},
 	{
@@ -32,7 +32,7 @@ struct rse_mboot_metadata rdaspen_rse_mboot_metadata[] = {
 		.slot = U(9),
 		.signer_id_size = SIGNER_ID_MIN_SIZE,
 		.sw_type = MBOOT_HW_CONFIG_STRING,
-		.lock_measurement = true,
+		.lock_measurement = false,
 		.pk_oid = HW_CONFIG_KEY_OID
 	},
 	{
@@ -40,7 +40,7 @@ struct rse_mboot_metadata rdaspen_rse_mboot_metadata[] = {
 		.slot = U(10),
 		.signer_id_size = SIGNER_ID_MIN_SIZE,
 		.sw_type = MBOOT_BL31_IMAGE_STRING,
-		.lock_measurement = true,
+		.lock_measurement = false,
 		.pk_oid = BL31_IMAGE_KEY_OID
 	},
 	{
@@ -48,7 +48,7 @@ struct rse_mboot_metadata rdaspen_rse_mboot_metadata[] = {
 		.slot = U(11),
 		.signer_id_size = SIGNER_ID_MIN_SIZE,
 		.sw_type = MBOOT_BL32_IMAGE_STRING,
-		.lock_measurement = true,
+		.lock_measurement = false,
 		.pk_oid = BL32_IMAGE_KEY_OID
 	},
 	{
@@ -56,7 +56,7 @@ struct rse_mboot_metadata rdaspen_rse_mboot_metadata[] = {
 		.slot = U(12),
 		.signer_id_size = SIGNER_ID_MIN_SIZE,
 		.sw_type = MBOOT_BL33_IMAGE_STRING,
-		.lock_measurement = true,
+		.lock_measurement = false,
 		.pk_oid = BL33_IMAGE_KEY_OID
 	},
 	{
