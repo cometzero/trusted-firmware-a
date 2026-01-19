@@ -1,10 +1,11 @@
 /*
- * Copyright (c) 2025, Arm Limited. All rights reserved.
+ * Copyright (c) 2025-2026, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #include <assert.h>
+#include <inttypes.h>
 #include <drivers/arm/pfdi_mod.h>
 #include <drivers/delay_timer.h>
 #include <plat/arm/common/plat_arm.h>
@@ -28,7 +29,30 @@ typedef struct {
 	pfdi_status_t error_id;
 } force_err_inject_t;
 
-static force_err_inject_t error_state[PLATFORM_CORE_COUNT];
+/* Update number of FORCE_ERROR slots supported per core when new feature is added*/
+#define PFDI_FORCE_ERR_SLOTS_PER_CORE  8U
+static force_err_inject_t error_state[PLATFORM_CORE_COUNT][PFDI_FORCE_ERR_SLOTS_PER_CORE];
+
+static force_err_inject_t *pfdi_find_or_alloc_force_slot(uint32_t core, uint32_t fid)
+{
+	force_err_inject_t *free_slot = NULL;
+
+	for (unsigned int i = 0; i < PFDI_FORCE_ERR_SLOTS_PER_CORE; i++) {
+		force_err_inject_t *s = &error_state[core][i];
+
+		/* If already have an entry for this fid, update it */
+		if (s->enabled && s->fid == fid) {
+			return s;
+		}
+
+		/* Track first free slot */
+		if (!s->enabled && free_slot == NULL) {
+			free_slot = s;
+		}
+	}
+
+	return free_slot;
+}
 
 /*
  * Wait until the CPU is OFF.
@@ -46,8 +70,8 @@ static void wait_cpu_off(u_register_t mpidr, int cpu_num)
 			return;
 		}
 		if (state < 0) {
-			ERROR("PFDI: CPU %d (mpidr=0x%lx) PSCI error)\n",
-				cpu_num, mpidr, state);
+			ERROR("PFDI: CPU %d (mpidr=0x%lx) PSCI error %d\n",
+			      cpu_num, mpidr, state);
 			panic();
 		}
 
@@ -136,15 +160,23 @@ void plat_pfdi_pe_init(void)
 
 static pfdi_status_t check_force_error(uint32_t fid)
 {
-	force_err_inject_t *state = &error_state[plat_my_core_pos()];
+	uint32_t core = plat_my_core_pos();
 
-	if (state->enabled && state->fid == fid) {
-		state->enabled = false;
-		state->fid = 0;
-		if (PFDI_HAS_PLAT_FUNC(check_plat_err))
-			return plat_pfdi_func_desc.check_plat_err(fid, state->error_id);
+	for (unsigned int i = 0; i < PFDI_FORCE_ERR_SLOTS_PER_CORE; i++) {
+		force_err_inject_t *state = &error_state[core][i];
 
-		return state->error_id;
+		if (state->enabled && state->fid == fid) {
+			pfdi_status_t err = state->error_id;
+
+			state->enabled = false;
+			state->fid = 0U;
+			state->error_id = RESERVED_ERROR_ID;
+
+			if (PFDI_HAS_PLAT_FUNC(check_plat_err)) {
+				return plat_pfdi_func_desc.check_plat_err(fid, err);
+			}
+			return err;
+		}
 	}
 
 	return RESERVED_ERROR_ID;
@@ -170,9 +202,16 @@ pfdi_status_t pfdi_pe_test_run(uint64_t start, uint64_t end, uint64_t mode,
 	uint64_t test_count;
 	pfdi_status_t ret;
 
+	if (ft_id == NULL)
+		return PFDI_INVALID_PARAMETERS;
+
 	ret = check_force_error(PFDI_PE_TEST_RUN);
-	if (ret != RESERVED_ERROR_ID)
+	if (ret != RESERVED_ERROR_ID) {
+		if (ret == PFDI_FAULT_FOUND)
+			*ft_id = 0;
+
 		goto exit;
+	}
 
 	if (pfdi_func_desc.count(&test_count) != PFDI_SUCCESS) {
 		ret = PFDI_ERROR;
@@ -184,10 +223,11 @@ pfdi_status_t pfdi_pe_test_run(uint64_t start, uint64_t end, uint64_t mode,
 		((int64_t)end < -1) ||
 		((int64_t)start >= 0 && (int64_t)end >= 0 &&
 			(start > end || start >= test_count || end >= test_count)) ||
-			!IS_VALID_MODE(mode) || ft_id == NULL) {
+			!IS_VALID_MODE(mode)) {
 
 		ret = PFDI_INVALID_PARAMETERS;
-		ERROR("PFDI: Invalid parameters: start=%lld, end=%lld, mode=%llu\n",
+		ERROR("PFDI: Invalid parameters: start=%" PRId64 ", end=%" PRId64
+			", mode=%" PRIu64 "\n",
 			(int64_t)start, (int64_t)end, mode);
 		goto exit;
 	}
@@ -298,8 +338,9 @@ pfdi_status_t pfdi_pe_fw_check(void)
 
 pfdi_status_t pfdi_pe_force_error(const uint32_t fid, const pfdi_status_t error_id)
 {
-	force_err_inject_t *state = &error_state[plat_my_core_pos()];
 	pfdi_status_t ret;
+	uint32_t core = plat_my_core_pos();
+	force_err_inject_t *state;
 
 	if (!IS_FEATURE_SUPPORTED(fid))
 		return PFDI_INVALID_PARAMETERS;
@@ -317,13 +358,15 @@ pfdi_status_t pfdi_pe_force_error(const uint32_t fid, const pfdi_status_t error_
 	if (ret != RESERVED_ERROR_ID)
 		return ret;
 
-	if (PFDI_HAS_PLAT_FUNC(force_plat_err)) {
-		if (plat_pfdi_func_desc.force_plat_err(fid, error_id) == PFDI_SUCCESS) {
-			state->enabled = true;
-			state->fid = fid;
-			return PFDI_SUCCESS;
-		}
+	/* allocate/find slot for this fid on this core */
+	state = pfdi_find_or_alloc_force_slot(core, fid);
+	if (state == NULL) {
 		return PFDI_ERROR;
+	}
+	if (PFDI_HAS_PLAT_FUNC(force_plat_err)) {
+		if (plat_pfdi_func_desc.force_plat_err(fid, error_id) != PFDI_SUCCESS) {
+			return PFDI_ERROR;
+		}
 	}
 
 	state->fid = fid;

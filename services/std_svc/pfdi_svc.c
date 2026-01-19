@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025, ARM Limited. All rights reserved.
+ * Copyright (c) 2025-2026, ARM Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -24,11 +24,12 @@ uint64_t pfdi_smc_handler(uint32_t smc_fid,
 			  void *handle,
 			  u_register_t flags)
 {
+	/* Set failed test id = invalid before invoking PFDI Function */
+	uint64_t ft_id = UINT64_MAX;
+	uint64_t x1_ret = 0;
+	pfdi_status_t ret;
+
 	switch (smc_fid) {
-		/* Set failed test id = invalid before invoking PFDI Function */
-		uint64_t ft_id = UINT64_MAX;
-		uint64_t x1_ret = 0;
-		pfdi_status_t ret;
 	case PFDI_VERSION:
 		uint64_t version = 0;
 		if ((x1 != 0ULL) || (x2 != 0ULL) || (x3 != 0ULL) || (x4 != 0ULL)) {
