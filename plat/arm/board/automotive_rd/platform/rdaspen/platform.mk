@@ -1,4 +1,4 @@
-# Copyright (c) 2025, Arm Limited. All rights reserved.
+# Copyright (c) 2025-2026, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -9,7 +9,8 @@ RDASPEN_BASE		 =	plat/arm/board/automotive_rd/platform/rdaspen
 RDASPEN_CPU_SOURCES	:=	lib/cpus/aarch64/cortex_a720_ae.S
 
 PLAT_INCLUDES		+=	-I${RDASPEN_BASE}/include/ 	\
-				-I${RDASPEN_BASE}/ras/include/
+				-I${RDASPEN_BASE}/ras/include/	\
+				-Idrivers/arm/mhu
 
 ifeq (${SCMI_PFDI_MONITOR}, 1)
 PLAT_INCLUDES		+=	-Idrivers/arm/css/scmi \
@@ -50,7 +51,9 @@ RESET_TO_BL2					:=	1
 SVE_VECTOR_LEN					:=	128
 USE_GIC_DRIVER					:=	3
 USE_COHERENT_MEM				:=	0
+
 PLAT_MHU 					:= 	MHUv3
+RSE_COMMS_BOOT_MK				:= 	drivers/arm/rse/rse_comms.mk
 
 # Enable the DSU driver and save DSU PMU registers on cluster off
 # and restore them on cluster on
@@ -74,7 +77,7 @@ endif
 ERRATA_A720_AE_3699562			:=	1
 
 include drivers/arm/gic/v3/gicv3.mk
-include drivers/arm/rse/rse_comms.mk
+include ${RSE_COMMS_BOOT_MK}
 
 PLAT_BL_COMMON_SOURCES	+=	${RDASPEN_BASE}/rdaspen_plat.c	\
 				${RDASPEN_BASE}/include/rdaspen_helpers.S
@@ -95,8 +98,14 @@ BL31_SOURCES	+=	${RDASPEN_CPU_SOURCES}	\
 			drivers/delay_timer/generic_delay_timer.c  \
 			lib/utils/mem_region.c	\
 			plat/arm/common/arm_nor_psci_mem_protect.c \
-			drivers/arm/dsu/dsu.c \
-			${RSE_COMMS_SOURCES}
+			drivers/arm/dsu/dsu.c
+
+ifeq ($(PLAT_MHU),MHUv3)
+BL31_SOURCES	+=	$(addprefix drivers/arm/mhu/,		\
+					mhu_v3_x.c		\
+					mhu_wrapper_v3_x.c	\
+				)
+endif
 
 ifeq ($(ENABLE_FEAT_RAS),1)
 ifeq ($(HANDLE_EA_EL3_FIRST_NS),1)
@@ -153,11 +162,13 @@ PLAT_BL_COMMON_SOURCES	:= $(filter-out						\
 ifeq (${MEASURED_BOOT},1)
 	MEASURED_BOOT_MK	:= drivers/measured_boot/rse/rse_measured_boot.mk
 	include ${MEASURED_BOOT_MK}
-	PLAT_MHU		:= MHUv3
-	RSE_COMMS_BOOT_MK	:= drivers/arm/rse/rse_comms.mk
-	include ${RSE_COMMS_BOOT_MK}
 	MEASURED_BOOT_SOURCES	+= lib/psa/measured_boot.c
-	MEASURED_BOOT_SOURCES	+= ${RSE_COMMS_SOURCES}
+	ENABLE_RSE_COMMS_BL2	:= 1
 	BL2_SOURCES		+= ${MEASURED_BOOT_SOURCES}
 	PLAT_BL_COMMON_SOURCES	+= ${RDASPEN_BASE}/rdaspen_measured_boot.c
+endif
+
+ifeq ($(ENABLE_RSE_COMMS_BL2),1)
+BL2_SOURCES	+=	${RDASPEN_BASE}/rdaspen_rse_comms.c	\
+			${RSE_COMMS_SOURCES}
 endif
