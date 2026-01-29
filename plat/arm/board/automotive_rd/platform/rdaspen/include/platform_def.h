@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025, Arm Limited. All rights reserved.
+ * Copyright (c) 2025-2026, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -107,13 +107,12 @@
 
 #undef ARM_DRAM2_BASE
 #undef ARM_DRAM2_SIZE
+#define ARM_DRAM2_BASE				ULL(0x20000000000)
 
 #if (TFA_PLATFORM_VARIANT == RD_ASPEN_VARIANT_FVP)
-#define ARM_DRAM2_BASE				ULL(0x20000000000)
 #define ARM_DRAM2_SIZE		 		SZ_2G
 #elif (TFA_PLATFORM_VARIANT == RD_ASPEN_VARIANT_RTL)
-#define ARM_DRAM2_BASE				ARM_DRAM1_BASE
-#define ARM_DRAM2_SIZE		 		ARM_DRAM1_SIZE
+#define ARM_DRAM2_SIZE		 		SZ_1G * 30
 #endif
 
 /*
