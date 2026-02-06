@@ -67,8 +67,8 @@ EL3_EXCEPTION_HANDLING			:=	1
 FAULT_INJECTION_SUPPORT			?=	1
 
 ifeq (${PFDI_SUPPORT}, 1)
-PFDI_SOURCE 		?=	${RDASPEN_BASE}/rdaspen_pfdi.c
-BL31_SOURCES		+=	${RDASPEN_BASE}/rdaspen_sbist.c \
+BL31_SOURCES 		+=	${RDASPEN_BASE}/cpu_self_test.c \
+				${RDASPEN_BASE}/rdaspen_sbist.c \
 				${PFDI_SOURCE}
 endif
 
