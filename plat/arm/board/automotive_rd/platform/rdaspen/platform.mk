@@ -187,3 +187,7 @@ endif
 $(eval $(call add_define,TFA_PLATFORM_VARIANT))
 $(eval $(call add_define,RD_ASPEN_VARIANT_FVP))
 $(eval $(call add_define,RD_ASPEN_VARIANT_RTL))
+
+ifeq ($(RD_ASPEN_VARIANT),cfg2)
+$(eval $(call add_define, RD_ASPEN_CFG2))
+endif
