@@ -290,16 +290,14 @@
 			interrupts = <GIC_SPI 121 IRQ_TYPE_LEVEL_HIGH>;
 		};
 
-		si_remoteproc: si_remoteproc@100000 {
+		si_remoteproc: si_remoteproc {
 			status = "disabled";
 			compatible = "arm,si-rproc";
-			ranges = <0x0 0x0 0x00100000 0x4000>;
-			#address-cells = <1>;
-			#size-cells = <1>;
-			si_cl1: si-cl1@1 {
+			ranges;
+			si_cl1: si-cl1 {
 				status = "disabled";
 				compatible = "arm,si-channel";
-				reg = <0x1 0x2000>;
+				ranges = <0x0 0x0 0x0 0x100000>;
 				memory-region = <&si_cl1_rproc_rsctbl>,
 						<&si_cl1_vdev0vring0>,
 						<&si_cl1_vdev0vring1>,
