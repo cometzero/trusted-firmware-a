@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2025, Arm Limited and Contributors. All rights reserved.
+ * Copyright (c) 2017-2026, Arm Limited and Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -338,13 +338,6 @@ void css_scp_system_off(int state)
 	}
 
 	/*
-	 * Disable GIC CPU interface to prevent pending interrupt from waking
-	 * up the AP from WFI.
-	 */
-	gic_cpuif_disable(core_pos);
-	gic_pcpu_off(core_pos);
-
-	/*
 	 * Issue SCMI command.
 	 */
 	ret = scmi_sys_pwr_state_set(scmi_handles[default_scmi_channel_id],
@@ -355,9 +348,6 @@ void css_scp_system_off(int state)
 			state, ret);
 		panic();
 	}
-
-	/* Powerdown of primary core */
-	psci_pwrdown_cpu_start(PLAT_MAX_PWR_LVL);
 }
 
 /*
