@@ -23,9 +23,9 @@
  * MHUv3 Trustzone Extension Support macros
  */
 #define MHU_FEAT_SPT_OFFSET0		0x10
-#define MHU_PBX_FEAT_TZE_SPT_SHIFT 	12
-#define MHU_PBX_FEAT_TZE_SPT_MASK 	GENMASK_32(15, 12)
-#define MHU_PBX_FEAT_TZE_SPT_VAL(val) 	\
+#define MHU_PBX_FEAT_TZE_SPT_SHIFT	12
+#define MHU_PBX_FEAT_TZE_SPT_MASK	GENMASK_32(15, 12)
+#define MHU_PBX_FEAT_TZE_SPT_VAL(val)	\
 	(((val) & MHU_PBX_FEAT_TZE_SPT_MASK) >> MHU_PBX_FEAT_TZE_SPT_SHIFT)
 
 #define SCMI_PFDI_MONITOR_INFO(channel_id)	\
@@ -94,6 +94,7 @@ static const uintptr_t rdaspen_gicr_base_addrs[] = {
 static bool is_mhuv3_tze_supported(uintptr_t mhuv3_dev_base)
 {
 	uint32_t feat_spt0 = mmio_read_32(mhuv3_dev_base + MHU_FEAT_SPT_OFFSET0);
+
 	if (MHU_PBX_FEAT_TZE_SPT_VAL(feat_spt0) == 0x1)
 		return true;
 	return false;
@@ -169,7 +170,7 @@ void rdaspen_bl31_plat_runtime_setup(void)
 #if CSS_SYSTEM_GRACEFUL_RESET
 	/* Register priority level handlers for reboot */
 	ehf_register_priority_handler(PLAT_REBOOT_PRI,
-				      css_reboot_interrupt_handler);
+			css_reboot_interrupt_handler);
 #endif
 }
 

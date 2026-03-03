@@ -19,7 +19,7 @@
 #define TFP_ERROR_STRING_OFFSET		U(0x4)
 
 /* Flop parity Error strings */
-static const char *tfp_error_strings[] = {
+static const char * const tfp_error_strings[] = {
 	"DSIDE",
 	"VECTOR_UNIT",
 	"MMU",
@@ -74,8 +74,8 @@ void plat_handle_uncontainable_ea(void)
 /* Initialise CPU RAS features for FHI configuration */
 static void rdaspen_setup_cpu_ras_config(void)
 {
-        uint64_t reg_erxctlr_el1 = 0;
-        unsigned int core_pos = plat_my_core_pos();
+	uint64_t reg_erxctlr_el1 = 0;
+	unsigned int core_pos = plat_my_core_pos();
 
 	/* Select Error Record 1, Error record 0 is for the DSU */
 	write_errselr_el1(CORE_RAM_ERR_RECORD);
