@@ -29,7 +29,7 @@
 #define PLAT_ARM_SYS_CNTREAD_BASE		UL(0x40010000)
 /* SI MHU regions 6MB in total */
 #define SI_MHU_REGION_BASE			UL(0x40020000)
-/* AP MHU regions 768KB in total */
+/* AP MHU secure regions 384KB in total */
 #define RDASPEN_CSS_AP_RSE_SECURE_MHU_BASE	UL(0x40680000)
 
 /* AP<->SI MHUv3 non-secure Tx and Rx frame base */
@@ -235,11 +235,11 @@
 							MT_DEVICE | MT_RO | \
 							MT_SECURE)
 
-/* SMD region */
-#define RDASPEN_SMD_REGION_BASE		UL(0x40000000)
-#define RDASPEN_SMD_REGION_SIZE		UL(0x10000000)
-#define RDASPEN_MAP_SMD_REGION		MAP_REGION_FLAT(RDASPEN_SMD_REGION_BASE, \
-							RDASPEN_SMD_REGION_SIZE, \
+/* SMD ATU region */
+#define RDASPEN_SMD_ATU_REGION_BASE		UL(0x40000000)
+#define RDASPEN_SMD_ATU_REGION_SIZE		UL(0x10000000)
+#define RDASPEN_MAP_SMD_ATU_REGION		MAP_REGION_FLAT(RDASPEN_SMD_ATU_REGION_BASE, \
+							RDASPEN_SMD_ATU_REGION_SIZE, \
 							MT_DEVICE | MT_RW | \
 							MT_SECURE)
 
@@ -329,7 +329,7 @@
 /* AP - RSE MHUv3 */
 #define MHU_V3_MBX_FRAME_OFFSET		UL(0x30000)
 
-/* MHUv3 Postbox and Mailbox register frame base */
+/* MHUv3 secure Postbox and Mailbox register frame base */
 #define AP_RSE_SECURE_MHU_V3_PBX	RDASPEN_CSS_AP_RSE_SECURE_MHU_BASE
 #define AP_RSE_SECURE_MHU_V3_MBX	RDASPEN_CSS_AP_RSE_SECURE_MHU_BASE + \
 						MHU_V3_MBX_FRAME_OFFSET
@@ -341,18 +341,6 @@
  * needs of this request.
  */
  #define PLAT_RSE_COMMS_PAYLOAD_MAX_SIZE	UL(0x1000)
-
-/*******************************************************************************
- * MHUv3 related definitions
- ******************************************************************************/
-
-/* AP - RSE MHUv3 */
-#define MHU_V3_MBX_FRAME_OFFSET		UL(0x30000)
-
-/* MHUv3 Postbox and Mailbox register frame base */
-#define AP_RSE_SECURE_MHU_V3_PBX	RDASPEN_CSS_AP_RSE_SECURE_MHU_BASE
-#define AP_RSE_SECURE_MHU_V3_MBX	RDASPEN_CSS_AP_RSE_SECURE_MHU_BASE + \
-						MHU_V3_MBX_FRAME_OFFSET
 
 /*
  * The SCMI PFDI Monitor memory regions
