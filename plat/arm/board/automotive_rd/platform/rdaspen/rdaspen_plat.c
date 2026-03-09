@@ -5,6 +5,7 @@
  */
 
 #include <common/debug.h>
+#include <drivers/arm/css/sds.h>
 #include <drivers/arm/sbsa.h>
 #include <lib/fconf/fconf.h>
 #include <lib/fconf/fconf_dyn_cfg_getter.h>
@@ -68,4 +69,14 @@ int plat_get_mbedtls_heap(void **heap_addr, size_t *heap_size)
 	assert(heap_size != NULL);
 
 	return arm_get_mbedtls_heap(heap_addr, heap_size);
+}
+
+static sds_region_desc_t rdaspen_sds_regions[] = {
+	{ .base = PLAT_ARM_SDS_MEM_BASE },
+};
+
+sds_region_desc_t* plat_sds_get_regions(unsigned int *region_count)
+{
+	*region_count = ARRAY_SIZE(rdaspen_sds_regions);
+	return rdaspen_sds_regions;
 }

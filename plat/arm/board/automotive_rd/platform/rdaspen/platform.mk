@@ -166,6 +166,7 @@ ifeq (${MEASURED_BOOT},1)
 	ENABLE_RSE_COMMS_BL2	:= 1
 	BL2_SOURCES		+= ${MEASURED_BOOT_SOURCES}
 	PLAT_BL_COMMON_SOURCES	+= ${RDASPEN_BASE}/rdaspen_measured_boot.c
+	BL2_SOURCES		+= drivers/arm/css/sds/sds.c
 endif
 
 ifeq ($(ENABLE_RSE_COMMS_BL2),1)
