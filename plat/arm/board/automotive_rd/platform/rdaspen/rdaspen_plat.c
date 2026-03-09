@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025, Arm Limited. All rights reserved.
+ * Copyright (c) 2025-2026, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -24,7 +24,7 @@ const mmap_region_t plat_arm_mmap[] = {
 #endif
 #if IMAGE_BL2
 	RDASPEN_MAP_NS_DRAM1,
-#if (TFA_PLATFORM_VARIANT == RD_ASPEN_VARIANT_FVP)
+#ifdef RD_ASPEN_VARIANT_FVP
 	RDASPEN_MAP_NS_DRAM2,
 #endif
 	RDASPEN_MAP_TRUSTED_NVCTR,

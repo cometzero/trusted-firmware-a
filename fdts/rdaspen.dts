@@ -67,7 +67,7 @@
 		/* Bank 1 (RTL): start = 0x0000_0200_0000_0000, size = 30 GiB  (0x7_8000_0000) */
 		reg = <
 			0x00000000  0x80000000  0x00000000  0x7F000000
-#if (TFA_PLATFORM_VARIANT == RD_ASPEN_VARIANT_FVP)
+#ifdef RD_ASPEN_VARIANT_FVP
 			0x00000200  0x00000000  0x00000000  0x80000000
 #else
 			0x00000200  0x00000000  0x00000007  0x80000000
@@ -201,7 +201,7 @@
 			interrupts = <GIC_SPI 50 IRQ_TYPE_LEVEL_HIGH>;
 		};
 
-#if (TFA_PLATFORM_VARIANT == RD_ASPEN_VARIANT_FVP)
+#ifdef RD_ASPEN_VARIANT_FVP
 		rtc@300d0000 {
 			compatible = "arm,pl031", "arm,primecell";
 			reg = <0x0 0x300d0000 0x0 0x10000>;
@@ -387,7 +387,7 @@
 
 };
 
-#ifdef RD_ASPEN_CFG2
+#ifdef RD_ASPEN_VARIANT_CFG2
 	&si_cl1                     { status = "okay"; };
 	&si_remoteproc              { status = "okay"; };
 	&si_cl1_rproc_rsctbl        { status = "okay"; };

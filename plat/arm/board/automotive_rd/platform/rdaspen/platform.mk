@@ -173,21 +173,15 @@ BL2_SOURCES	+=	${RDASPEN_BASE}/rdaspen_rse_comms.c	\
 			${RSE_COMMS_SOURCES}
 endif
 
-# Default RD-Aspen variant
-TFA_PLATFORM_VARIANT	:= 0
-RD_ASPEN_VARIANT_FVP	:= 0
-RD_ASPEN_VARIANT_RTL	:= 1
-RD_ASPEN_VARIANTS 	:= $(RD_ASPEN_VARIANT_FVP) $(RD_ASPEN_VARIANT_RTL)
+# Pass variant values to platform build
+RD_ASPEN_VARIANT ?= cfg1
+RD_ASPEN_VARIANTS := rtl cfg1 cfg2
 
-ifneq ($(TFA_PLATFORM_VARIANT),$(filter $(TFA_PLATFORM_VARIANT),$(RD_ASPEN_VARIANTS)))
-  $(error TFA_PLATFORM_VARIANT for RD-Aspen should be $(RD_ASPEN_VARIANT_FVP) for FVP or \
-$(RD_ASPEN_VARIANT_RTL) for RTL, currently set to $(TFA_PLATFORM_VARIANT).)
+ifeq ($(filter $(RD_ASPEN_VARIANT), $(RD_ASPEN_VARIANTS)),)
+$(error RD_ASPEN_VARIANT must be one of: $(RD_ASPEN_VARIANTS). Got '$(RD_ASPEN_VARIANT)')
 endif
 
-$(eval $(call add_define,TFA_PLATFORM_VARIANT))
+$(eval $(call add_define,RD_ASPEN_VARIANT_$(call uppercase,$(RD_ASPEN_VARIANT))))
+ifneq ($(filter $(RD_ASPEN_VARIANT), cfg1 cfg2),)
 $(eval $(call add_define,RD_ASPEN_VARIANT_FVP))
-$(eval $(call add_define,RD_ASPEN_VARIANT_RTL))
-
-ifeq ($(RD_ASPEN_VARIANT),cfg2)
-$(eval $(call add_define, RD_ASPEN_CFG2))
 endif
