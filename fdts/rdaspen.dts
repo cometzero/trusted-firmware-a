@@ -270,20 +270,20 @@
 			msi-parent = <&its1 0x10000>;
 		};
 
-		si_cl1_mbox_rproc_tx: mhu@40120000 {
+		si_cl1_mbox_rproc_tx: mhu@400b0000 {
 			status = "disabled";
 			compatible = "arm,mhuv3";
-			reg = <0x0 0x40120000 0x0 MHU_V3_TX_RX_FRAME_SIZE>;
+			reg = <0x0 0x400b0000 0x0 MHU_V3_TX_RX_FRAME_SIZE>;
 			clocks = <&soc_clk24mhz>;
 			#mbox-cells = <3>;
 			interrupt-names = "combined";
 			interrupts = <GIC_SPI 120 IRQ_TYPE_LEVEL_HIGH>;
 		};
 
-		si_cl1_mbox_rproc_rx: mhu@40160000 {
+		si_cl1_mbox_rproc_rx: mhu@400e0000 {
 			status = "disabled";
 			compatible = "arm,mhuv3";
-			reg = <0x0 0x40160000 0x0 MHU_V3_TX_RX_FRAME_SIZE>;
+			reg = <0x0 0x400e0000 0x0 MHU_V3_TX_RX_FRAME_SIZE>;
 			clocks = <&soc_clk24mhz>;
 			#mbox-cells = <3>;
 			interrupt-names = "combined";
@@ -360,7 +360,7 @@
 		interrupt-names = "pbx-dbch-xfer-ack-0";
 	};
 
-	mbox_db_rx: mhu@40060000 {
+	mbox_db_rx: mhu@40050000 {
 		compatible = "arm,mhuv3";
 		reg = <0x0 AP_SI_NON_SECURE_MHU_V3_RX_BASE 0x0 MHU_V3_TX_RX_FRAME_SIZE>;
 		clocks = <&soc_clk24mhz>;
