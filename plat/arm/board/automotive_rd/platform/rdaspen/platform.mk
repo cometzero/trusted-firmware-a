@@ -144,6 +144,10 @@ RDASPEN_HW_CONFIG_DTS	:= fdts/rdaspen_fvp.dts
 endif
 
 # Add the FDT_SOURCES and options for Dynamic Config
+ifeq ($(LINUX_DTS),1)
+RDASPEN_HW_CONFIG_DTS	:=	fdts/zena-css-fvp.dts
+endif
+
 FDT_SOURCES	+=	${RDASPEN_BASE}/fdts/${PLAT}_fw_config.dts	\
 			$(RDASPEN_HW_CONFIG_DTS) \
 			${RDASPEN_BASE}/fdts/${PLAT}_optee_spmc_manifest.dts
