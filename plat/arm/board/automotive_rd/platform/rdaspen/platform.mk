@@ -120,13 +120,36 @@ FIP_BL2_ARGS	:=	tb-fw
 $(eval $(call TOOL_ADD_PAYLOAD,${BUILD_PLAT}/tb_fw.crt,--tb-fw-cert))
 endif
 
+# Pass variant values to platform build
+RD_ASPEN_VARIANT ?= cfg1
+RD_ASPEN_VARIANTS := cfg1 cfg2 emu fpga
+
+ifeq ($(filter $(RD_ASPEN_VARIANT), $(RD_ASPEN_VARIANTS)),)
+$(error RD_ASPEN_VARIANT must be one of: $(RD_ASPEN_VARIANTS). Got '$(RD_ASPEN_VARIANT)')
+endif
+
+$(eval $(call add_define,RD_ASPEN_VARIANT_$(call uppercase,$(RD_ASPEN_VARIANT))))
+ifneq ($(filter $(RD_ASPEN_VARIANT), cfg1 cfg2),)
+$(eval $(call add_define,RD_ASPEN_VARIANT_FVP))
+endif
+ifneq ($(filter $(RD_ASPEN_VARIANT), emu fpga),)
+$(eval $(call add_define,RD_ASPEN_VARIANT_RTL))
+endif
+
+# Select per-variant HW config DTS before listing FDT_SOURCES.
+ifneq ($(filter $(RD_ASPEN_VARIANT),emu fpga),)
+RDASPEN_HW_CONFIG_DTS	:= fdts/rdaspen_rtl.dts
+else ifneq ($(filter $(RD_ASPEN_VARIANT),cfg1 cfg2),)
+RDASPEN_HW_CONFIG_DTS	:= fdts/rdaspen_fvp.dts
+endif
+
 # Add the FDT_SOURCES and options for Dynamic Config
 FDT_SOURCES	+=	${RDASPEN_BASE}/fdts/${PLAT}_fw_config.dts	\
-			fdts/${PLAT}.dts \
+			$(RDASPEN_HW_CONFIG_DTS) \
 			${RDASPEN_BASE}/fdts/${PLAT}_optee_spmc_manifest.dts
 
 FW_CONFIG	:=	${BUILD_PLAT}/fdts/${PLAT}_fw_config.dtb
-HW_CONFIG	:=	${BUILD_PLAT}/fdts/${PLAT}.dtb
+HW_CONFIG	:=	${BUILD_PLAT}/fdts/$(basename $(notdir $(RDASPEN_HW_CONFIG_DTS))).dtb
 TOS_FW_CONFIG	:=	${BUILD_PLAT}/fdts/${PLAT}_optee_spmc_manifest.dtb
 
 # Add the FW_CONFIG to FIP and specify the same to certtool
@@ -172,17 +195,4 @@ endif
 ifeq ($(ENABLE_RSE_COMMS_BL2),1)
 BL2_SOURCES	+=	${RDASPEN_BASE}/rdaspen_rse_comms.c	\
 			${RSE_COMMS_SOURCES}
-endif
-
-# Pass variant values to platform build
-RD_ASPEN_VARIANT ?= cfg1
-RD_ASPEN_VARIANTS := rtl cfg1 cfg2
-
-ifeq ($(filter $(RD_ASPEN_VARIANT), $(RD_ASPEN_VARIANTS)),)
-$(error RD_ASPEN_VARIANT must be one of: $(RD_ASPEN_VARIANTS). Got '$(RD_ASPEN_VARIANT)')
-endif
-
-$(eval $(call add_define,RD_ASPEN_VARIANT_$(call uppercase,$(RD_ASPEN_VARIANT))))
-ifneq ($(filter $(RD_ASPEN_VARIANT), cfg1 cfg2),)
-$(eval $(call add_define,RD_ASPEN_VARIANT_FVP))
 endif

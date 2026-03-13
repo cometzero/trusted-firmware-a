@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-/dts-v1/;
-
 #include <dt-bindings/interrupt-controller/arm-gic.h>
 #include "rdaspen-defs.dtsi"
 
@@ -59,19 +57,12 @@
 	L3_CACHE
 	DSU_PMU
 
-	memory@80000000 {
+	memory0: memory@80000000 {
 		device_type = "memory";
 
 		/* Bank 0: start = 0x0000_0000_8000_0000, size = ~2 GiB (0x7F00_0000) */
-		/* Bank 1 (FVP): start = 0x0000_0200_0000_0000, size = 2 GiB  (0x8000_0000) */
-		/* Bank 1 (RTL): start = 0x0000_0200_0000_0000, size = 30 GiB  (0x7_8000_0000) */
 		reg = <
 			0x00000000  0x80000000  0x00000000  0x7F000000
-#ifdef RD_ASPEN_VARIANT_FVP
-			0x00000200  0x00000000  0x00000000  0x80000000
-#else
-			0x00000200  0x00000000  0x00000007  0x80000000
-#endif
 		>;
 	};
 
@@ -129,7 +120,7 @@
 		};
 	};
 
-	soc {
+	soc: soc {
 		compatible = "simple-bus";
 		#address-cells = <2>;
 		#size-cells = <2>;
@@ -200,56 +191,6 @@
 			      <0x0 0x1a430000 0x0 0x10000>;
 			interrupts = <GIC_SPI 50 IRQ_TYPE_LEVEL_HIGH>;
 		};
-
-#ifdef RD_ASPEN_VARIANT_FVP
-		rtc@300d0000 {
-			compatible = "arm,pl031", "arm,primecell";
-			reg = <0x0 0x300d0000 0x0 0x10000>;
-			interrupts = <GIC_SPI 268 IRQ_TYPE_LEVEL_HIGH>;
-			clocks = <&soc_clk24mhz>;
-			clock-names = "apb_pclk";
-		};
-
-		virtio-net@30060000 {
-			compatible = "virtio,mmio";
-			reg = <0x0 0x30060000 0x0 0x10000>;
-			interrupts = <GIC_SPI 261 IRQ_TYPE_LEVEL_HIGH>;
-		};
-
-		/* OS storage */
-		virtio-block@30020000 {
-			compatible = "virtio,mmio";
-			reg = <0x0 0x30020000 0x0 0x10000>;
-			interrupts = <GIC_SPI 257 IRQ_TYPE_LEVEL_HIGH>;
-		};
-
-		/* Distro installation media */
-		virtio-block@30030000 {
-			compatible = "virtio,mmio";
-			reg = <0x0 0x30030000 0x0 0x10000>;
-			interrupts = <GIC_SPI 258 IRQ_TYPE_LEVEL_HIGH>;
-		};
-
-		/* SystemReady ACS validation media */
-		virtio-block@30040000 {
-			compatible = "virtio,mmio";
-			reg = <0x0 0x30040000 0x0 0x10000>;
-			interrupts = <GIC_SPI 259 IRQ_TYPE_LEVEL_HIGH>;
-		};
-
-		/* User data media */
-		virtio-block@30050000 {
-			compatible = "virtio,mmio";
-			reg = <0x0 0x30050000 0x0 0x10000>;
-			interrupts = <GIC_SPI 260 IRQ_TYPE_LEVEL_HIGH>;
-		};
-
-		virtio-rng@30080000 {
-			compatible = "virtio,mmio";
-			reg = <0x0 0x30080000 0x0 0x10000>;
-			interrupts = <GIC_SPI 263 IRQ_TYPE_LEVEL_HIGH>;
-		};
-#endif
 
 		ras-ffh@ffa00000 {
 			compatible = "arm,ras-ffh";
