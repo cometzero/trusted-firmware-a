@@ -268,12 +268,10 @@
 							MT_MEMORY | MT_RW | \
 							MT_NS)
 
-#ifdef RD_ASPEN_VARIANT_FVP
 #define RDASPEN_MAP_NS_DRAM2		MAP_REGION_FLAT(ARM_DRAM2_BASE, \
 							ARM_DRAM2_SIZE,	\
 							MT_MEMORY | MT_RW | \
 							MT_NS)
-#endif
 
 /* Secure DRAM */
 #define RDASPEN_MAP_S_DRAM		MAP_REGION_FLAT(PLAT_ARM_SPMC_BASE, \
