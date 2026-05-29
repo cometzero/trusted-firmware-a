@@ -6,3 +6,6 @@
 	path = contrib/libeventlog
 	url = https://review.trustedfirmware.org/shared/libEventLog
 	shallow = true
+[submodule "mbedtls"]
+	path = mbedtls
+	url = https://github.com/ARMmbed/mbedtls.git
