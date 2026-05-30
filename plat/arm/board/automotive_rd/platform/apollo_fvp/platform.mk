@@ -149,7 +149,7 @@ endif
 
 # Add the FDT_SOURCES and options for Dynamic Config
 ifeq ($(LINUX_DTS),1)
-APOLLO_FVP_HW_CONFIG_DTS	:=	fdts/zena-css-fvp.dts
+APOLLO_FVP_HW_CONFIG_DTS	:=	fdts/apollo_fvp_linux.dts
 endif
 
 FDT_SOURCES	+=	${APOLLO_FVP_BASE}/fdts/${PLAT}_fw_config.dts	\
