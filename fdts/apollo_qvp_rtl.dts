@@ -1,0 +1,36 @@
+/*
+ * Copyright (c) 2026, Arm Limited. All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
+/dts-v1/;
+
+#include "apollo_qvp.dtsi"
+
+&memory0 {
+	/*
+	 * RTL memory map:
+	 * - Bank 0: start = 0x0000_0000_8000_0000, size = ~2 GiB (0x7F00_0000)
+	 * - Bank 1: start = 0x0000_0200_0000_0000, size = 30 GiB (0x780000000)
+	 */
+	reg = <
+		0x00000000  0x80000000  0x00000000  0x7F000000
+		0x00000200  0x00000000  0x00000007  0x80000000
+	>;
+};
+
+#ifdef APOLLO_QVP_VARIANT_FPGA
+/ {
+	uart_clk10mhz: clk10mhz {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <10000000>;
+		clock-output-names = "refclk10mhz";
+	};
+};
+
+&soc_serial0 {
+	clocks = <&uart_clk10mhz>, <&soc_clk24mhz>;
+};
+#endif
