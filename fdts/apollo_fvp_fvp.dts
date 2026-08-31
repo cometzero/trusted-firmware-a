@@ -21,6 +21,24 @@
 };
 
 &soc {
+	pcie4: pcie@10040000000 {
+		compatible = "pci-host-ecam-generic";
+		device_type = "pci";
+		#address-cells = <3>;
+		#size-cells = <2>;
+		reg = <0x100 0x40000000 0x0 0x10000000>;
+		bus-range = <0x0 0xff>;
+		linux,pci-domain = <4>;
+		ranges = <0x02000000 0x0 0x60000000
+			  0x0 0x60000000 0x0 0x20000000>,
+			 <0x43000000 0x101 0x60000000
+			  0x101 0x60000000 0x0 0x20000000>;
+		msi-map = <0x0 &its1 0x0 0x10000>;
+		iommu-map = <0x0 &smmu 0x0 0x10000>;
+		dma-coherent;
+		ats-supported;
+	};
+
 	rtc@300d0000 {
 		compatible = "arm,pl031", "arm,primecell";
 		reg = <0x0 0x300d0000 0x0 0x10000>;
