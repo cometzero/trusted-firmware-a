@@ -185,7 +185,10 @@
 /* SCMI Related Constants */
 #define PLAT_ARM_SCMI_CHANNEL_COUNT		U(1)
 #define CSS_SYSTEM_PWR_DMN_LVL			ARM_PWR_LVL2
-#define PLAT_MAX_PWR_LVL			ARM_PWR_LVL1
+#define PLAT_MAX_PWR_LVL			CSS_SYSTEM_PWR_DMN_LVL
+/* One CSS system domain, populated clusters, and their processing elements. */
+#define PLAT_NUM_PWR_DOMAINS			(U(1) + PLAT_ARM_CLUSTER_COUNT + \
+						 PLATFORM_CORE_COUNT)
 
 /* SCMI PFDI Monitor Related Constants */
 #define PLAT_ARM_SCMI_PFDI_MONITOR_CHANNEL_COUNT	U(16)

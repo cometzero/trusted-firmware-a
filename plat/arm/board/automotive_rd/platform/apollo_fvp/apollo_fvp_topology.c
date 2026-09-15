@@ -9,11 +9,19 @@
 #include <platform_def.h>
 
 const unsigned char apollo_fvp_pd_tree_desc[] = {
+	/* CSS system domain above the cluster domains (PSCI power level 2). */
+	1,
 	PLAT_ARM_CLUSTER_COUNT,
 	PLATFORM_CLUSTER_0_CORE_COUNT,
+#if PLATFORM_CORE_COUNT > 4
 	PLATFORM_CLUSTER_1_CORE_COUNT,
+#endif
+#if PLATFORM_CORE_COUNT > 8
 	PLATFORM_CLUSTER_2_CORE_COUNT,
+#endif
+#if PLATFORM_CORE_COUNT > 12
 	PLATFORM_CLUSTER_3_CORE_COUNT,
+#endif
 };
 
 static const unsigned char cluster_id_core_count_map[] = {
