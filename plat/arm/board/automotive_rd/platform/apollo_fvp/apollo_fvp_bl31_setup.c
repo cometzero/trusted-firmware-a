@@ -133,12 +133,27 @@ static int apollo_fvp_pwr_domain_on(u_register_t mpidr)
 }
 #endif
 
+static void apollo_fvp_pwr_domain_suspend_finish(
+		const psci_power_state_t *target_state)
+{
+	/*
+	 * Keep the CSS system-resume path: it restores GIC context, security
+	 * configuration and timer access before re-enabling the CPU interface.
+	 * The SCP must restore the powered-down interconnect before releasing AP.
+	 */
+	css_pwr_domain_suspend_finish(target_state);
+	if (CSS_CORE_PWR_STATE(target_state) == ARM_LOCAL_STATE_OFF) {
+		apollo_fvp_ras_init_per_cpu();
+	}
+}
+
 const plat_psci_ops_t *plat_arm_psci_override_pm_ops(plat_psci_ops_t *ops)
 {
 #if PFDI_SUPPORT
 	ops->pwr_domain_on = apollo_fvp_pwr_domain_on;
 #endif
 	ops->pwr_domain_on_finish = apollo_fvp_css_pwr_domain_on_finish;
+	ops->pwr_domain_suspend_finish = apollo_fvp_pwr_domain_suspend_finish;
 	return css_scmi_override_pm_ops(ops);
 }
 
