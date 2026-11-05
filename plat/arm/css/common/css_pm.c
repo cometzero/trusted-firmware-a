@@ -22,6 +22,7 @@
 
 /* Allow CSS platforms to override `plat_arm_psci_pm_ops` */
 #pragma weak plat_arm_psci_pm_ops
+#pragma weak plat_css_prepare_cpu_shutdown
 
 #if ARM_RECOM_STATE_ID_ENC
 /*
@@ -207,6 +208,11 @@ void css_pwr_domain_suspend_finish(
 /*******************************************************************************
  * Handlers to shutdown/reboot the system
  ******************************************************************************/
+/* Platforms may arm a terminal core power policy before the final WFI. */
+void plat_css_prepare_cpu_shutdown(void)
+{
+}
+
 void css_system_off(void)
 {
 	css_scp_sys_shutdown();
@@ -356,6 +362,7 @@ int css_reboot_interrupt_handler(uint32_t intr_raw, uint32_t flags,
 	gic_cpuif_disable(core_pos);
 	gic_pcpu_off(core_pos);
 
+	plat_css_prepare_cpu_shutdown();
 	psci_pwrdown_cpu_start(PLAT_MAX_PWR_LVL);
 
 	psci_pwrdown_cpu_end_terminal();

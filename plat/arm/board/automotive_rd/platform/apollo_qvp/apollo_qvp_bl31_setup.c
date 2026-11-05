@@ -179,6 +179,23 @@ void bl31_plat_runtime_setup(void)
 	apollo_qvp_bl31_plat_runtime_setup();
 }
 
+void plat_css_prepare_cpu_shutdown(void)
+{
+	psci_power_state_t target_state;
+
+	/*
+	 * The SCP keeps a core running until its powerdown WFI, but locks it
+	 * OFF afterwards. Without this request the dynamic idle policy can
+	 * wake a terminally stopped core after the trusted mailbox is cleared.
+	 * Keep the cluster on so the primary can finish its SCMI system request.
+	 */
+	for (unsigned int lvl = 0U; lvl <= PLAT_MAX_PWR_LVL; lvl++) {
+		target_state.pwr_domain_state[lvl] = ARM_LOCAL_STATE_RUN;
+	}
+	target_state.pwr_domain_state[ARM_PWR_LVL0] = ARM_LOCAL_STATE_OFF;
+	css_scp_off(&target_state);
+}
+
 #if defined(SPD_spmd) && (SPMC_AT_EL3 == 0)
 /*
  * A dummy implementation of the platform handler for Group0 secure interrupt.

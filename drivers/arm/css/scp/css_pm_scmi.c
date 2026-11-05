@@ -321,6 +321,8 @@ void css_scp_system_off(int state)
 {
 	int ret;
 
+	plat_css_prepare_cpu_shutdown();
+
 	/*
 	 * Before issuing the system power down command, set the trusted mailbox
 	 * to 0. This will ensure that in the case of a warm/cold reset, the

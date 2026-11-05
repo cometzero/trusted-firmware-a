@@ -41,6 +41,7 @@ void css_cpu_standby(plat_local_state_t cpu_state);
 void css_get_sys_suspend_power_state(psci_power_state_t *req_state);
 int css_node_hw_state(u_register_t mpidr, unsigned int power_level);
 void css_setup_cpu_pwr_down_intr(void);
+void plat_css_prepare_cpu_shutdown(void);
 int css_reboot_interrupt_handler(uint32_t intr_raw, uint32_t flags,
 		void *handle, void *cookie);
 
